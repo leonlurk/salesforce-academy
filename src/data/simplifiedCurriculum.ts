@@ -2850,6 +2850,454 @@ The journey from admin to developer is one of the most rewarding in tech. You're
           attempts: 0,
           maxAttempts: 3
         }
+      },
+      {
+        id: 'advanced-apex',
+        title: 'Advanced Apex Development',
+        description: 'Master triggers, batch processing, async operations, and enterprise patterns',
+        duration: '3 weeks',
+        completed: false,
+        locked: true,
+        order: 2,
+        lessons: [
+          {
+            id: 'apex-triggers-mastery',
+            title: 'Apex Triggers: Handle Data Changes Like a Pro',
+            type: 'content',
+            duration: '50 min',
+            completed: false,
+            points: 450,
+            order: 1,
+            content: {
+              text: `# Apex Triggers: Where the Real Magic Happens! ⚡
+
+Welcome to the most powerful feature in Salesforce development!
+
+Triggers are where you intercept data changes and implement complex business logic that runs automatically. Master triggers, and you become the developer who can solve any business requirement!
+
+## What Are Triggers? 🎯
+
+**Triggers are Apex code that executes automatically** when data changes occur:
+- **BEFORE** events: Data validation and preparation
+- **AFTER** events: Related record updates and external system calls
+
+## Trigger Best Practices 🌟
+
+### 1. One Trigger Per Object
+**Do this:**
+\`\`\`apex
+trigger AccountTrigger on Account (before insert, before update, after insert, after update) {
+    AccountTriggerHandler.handle();
+}
+\`\`\`
+
+### 2. Handler Pattern
+\`\`\`apex
+public class AccountTriggerHandler {
+    public static void handle() {
+        if (Trigger.isBefore) {
+            if (Trigger.isInsert) {
+                validateRequiredFields(Trigger.new);
+            }
+        }
+        if (Trigger.isAfter && Trigger.isUpdate) {
+            updateRelatedRecords(Trigger.new, Trigger.oldMap);
+        }
+    }
+}
+\`\`\`
+
+## Batch Apex: Process Large Data Volumes 🚀
+
+### When to Use Batch Apex
+- Processing more than 50,000 records
+- Complex calculations on large datasets
+- Data migration and cleanup
+- Scheduled mass updates
+
+### Batch Apex Template
+\`\`\`apex
+public class AccountUpdateBatch implements Database.Batchable<sObject> {
+    public Database.QueryLocator start(Database.BatchableContext bc) {
+        return Database.getQueryLocator('SELECT Id, Name FROM Account');
+    }
+
+    public void execute(Database.BatchableContext bc, List<Account> accounts) {
+        // Process records
+        update accounts;
+    }
+
+    public void finish(Database.BatchableContext bc) {
+        // Send completion notification
+    }
+}
+\`\`\`
+
+## Async Processing Patterns ⚡
+
+### Future Methods
+\`\`\`apex
+@future(callout=true)
+public static void syncToExternalSystem(Set<Id> recordIds) {
+    // Make external callouts
+}
+\`\`\`
+
+### Queueable Apex (Recommended)
+\`\`\`apex
+public class DataProcessor implements Queueable, Database.AllowsCallouts {
+    public void execute(QueueableContext context) {
+        // Process data and make callouts
+    }
+}
+\`\`\`
+
+**Remember**: Advanced Apex is about building enterprise-grade solutions that scale, perform, and integrate seamlessly!`,
+              resources: [
+                {
+                  title: 'Apex Triggers Guide',
+                  type: 'documentation',
+                  url: 'https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_triggers.htm',
+                  description: 'Complete guide to Apex triggers and best practices'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'advanced-apex-quiz',
+          title: 'Advanced Apex Development Quiz',
+          questions: [
+            {
+              id: 'apex-adv-q1',
+              type: 'multiple-choice',
+              question: 'Which trigger context variable contains the new version of records being updated?',
+              options: ['Trigger.old', 'Trigger.new', 'Trigger.newMap', 'Trigger.oldMap'],
+              correctAnswer: 'Trigger.new',
+              explanation: 'Trigger.new contains the new version of the records that are being inserted or updated.',
+              points: 20,
+              difficulty: 'medium',
+              category: 'triggers'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'lightning-web-components',
+        title: 'Lightning Web Components Fundamentals',
+        description: 'Build modern, performant user interfaces with Lightning Web Components',
+        duration: '3 weeks',
+        completed: false,
+        locked: true,
+        order: 3,
+        lessons: [
+          {
+            id: 'lwc-fundamentals',
+            title: 'LWC Fundamentals: Modern JavaScript in Salesforce',
+            type: 'interactive',
+            duration: '45 min',
+            completed: false,
+            points: 400,
+            order: 1,
+            content: {
+              text: `# Lightning Web Components: The Future is Here! ⚡
+
+Welcome to modern Salesforce development!
+
+Lightning Web Components (LWC) is built on modern web standards, making it faster, lighter, and more powerful than ever before!
+
+## What Are Lightning Web Components? 🚀
+
+**LWC is Salesforce's modern UI framework** built on:
+- **Web Standards**: ES6+, Custom Elements, Shadow DOM
+- **Lightning Platform**: Seamless Salesforce integration
+- **Performance**: Faster loading and execution
+- **Developer Experience**: Modern tooling and debugging
+
+## Component Structure 🏗️
+\`\`\`
+myComponent/
+├── myComponent.js        // JavaScript controller
+├── myComponent.html      // HTML template
+├── myComponent.css       // CSS styles
+└── myComponent.js-meta.xml // Configuration
+\`\`\`
+
+## LWC Decorators 🎨
+
+### @track (Reactive Properties)
+\`\`\`javascript
+import { LightningElement, track } from 'lwc';
+
+export default class ContactList extends LightningElement {
+    @track contacts = [];
+    @track error;
+}
+\`\`\`
+
+### @api (Public Properties)
+\`\`\`javascript
+export default class AccountCard extends LightningElement {
+    @api recordId;      // Passed from parent
+    @api showDetails = false;
+}
+\`\`\`
+
+### @wire (Data Binding)
+\`\`\`javascript
+@wire(getRecord, { recordId: '$recordId', fields: [ACCOUNT_NAME_FIELD] })
+account;
+\`\`\`
+
+## Component Communication 🔄
+
+### Parent to Child
+\`\`\`html
+<c-child-component account-id={selectedAccountId}></c-child-component>
+\`\`\`
+
+### Child to Parent (Custom Events)
+\`\`\`javascript
+const event = new CustomEvent('accountselected', {
+    detail: { accountId: this.accountId }
+});
+this.dispatchEvent(event);
+\`\`\`
+
+**Remember**: LWC is about building fast, maintainable, standards-based components!`,
+              interactive: [
+                {
+                  type: 'click-sequence',
+                  data: {
+                    title: 'Create Your First LWC Component',
+                    description: 'Build a simple "Hello World" Lightning Web Component',
+                    steps: [
+                      {
+                        instruction: 'Open VS Code with Salesforce Extension Pack',
+                        hint: 'Ensure you have the official Salesforce extensions installed'
+                      },
+                      {
+                        instruction: 'Run "SFDX: Create Lightning Web Component"',
+                        hint: 'This opens the component creation wizard'
+                      },
+                      {
+                        instruction: 'Name your component "helloWorld"',
+                        hint: 'Use camelCase for component names'
+                      },
+                      {
+                        instruction: 'Add HTML template with lightning-card',
+                        hint: 'Use SLDS components for consistent styling'
+                      }
+                    ]
+                  },
+                  validation: {
+                    correctSequence: [1, 2, 3, 4]
+                  },
+                  feedback: 'Excellent! You\'ve created your first Lightning Web Component!'
+                }
+              ],
+              resources: [
+                {
+                  title: 'Lightning Web Components Guide',
+                  type: 'documentation',
+                  url: 'https://developer.salesforce.com/docs/component-library/documentation/en/lwc',
+                  description: 'Complete LWC documentation and examples'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'lwc-quiz',
+          title: 'Lightning Web Components Quiz',
+          questions: [
+            {
+              id: 'lwc-q1',
+              type: 'multiple-choice',
+              question: 'Which decorator is used to make a property reactive in LWC?',
+              options: ['@api', '@track', '@wire', '@reactive'],
+              correctAnswer: '@track',
+              explanation: '@track makes properties reactive, automatically updating the UI when the property value changes.',
+              points: 20,
+              difficulty: 'medium',
+              category: 'lwc-decorators'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'testing-debugging',
+        title: 'Testing & Debugging Mastery',
+        description: 'Master unit testing, integration testing, and debugging techniques',
+        duration: '2 weeks',
+        completed: false,
+        locked: true,
+        order: 4,
+        lessons: [
+          {
+            id: 'apex-testing-fundamentals',
+            title: 'Apex Testing: Build Bulletproof Code',
+            type: 'content',
+            duration: '40 min',
+            completed: false,
+            points: 400,
+            order: 1,
+            content: {
+              text: `# Apex Testing: Your Code's Best Friend! 🧪
+
+Welcome to the world of bulletproof development!
+
+Testing isn't just a requirement in Salesforce - it's your superpower for building reliable, maintainable code that works under any condition.
+
+## Why Testing Matters 🎯
+
+**Salesforce Requires 75% Code Coverage** for production deployments, but great developers aim for:
+- **90%+ coverage** with meaningful tests
+- **Edge case validation**
+- **Negative scenario testing**
+- **Bulk operation testing**
+
+## Test Class Fundamentals 🏗️
+
+### Basic Test Structure
+\`\`\`apex
+@isTest
+public class AccountTriggerTest {
+    @TestSetup
+    static void setupTestData() {
+        List<Account> testAccounts = new List<Account>();
+        for (Integer i = 0; i < 200; i++) {
+            testAccounts.add(new Account(Name = 'Test Account ' + i));
+        }
+        insert testAccounts;
+    }
+
+    @isTest
+    static void testAccountInsert() {
+        Test.startTest();
+
+        Account newAccount = new Account(Name = 'New Test Account');
+        insert newAccount;
+
+        Test.stopTest();
+
+        Account insertedAccount = [SELECT Id, Name FROM Account WHERE Id = :newAccount.Id];
+        System.assertEquals('New Test Account', insertedAccount.Name);
+    }
+}
+\`\`\`
+
+## Testing Best Practices 🌟
+
+### 1. Create Your Own Test Data
+\`\`\`apex
+@isTest
+static void goodTest() {
+    Account acc = new Account(Name = 'Test Account');
+    insert acc;
+    // Test logic - guaranteed to work
+}
+\`\`\`
+
+### 2. Test Bulk Operations
+\`\`\`apex
+@isTest
+static void testBulkUpdate() {
+    List<Account> accounts = createTestAccounts(200);
+
+    Test.startTest();
+    // Bulk operation
+    Test.stopTest();
+
+    // Assertions for all records
+}
+\`\`\`
+
+### 3. Test Negative Scenarios
+\`\`\`apex
+@isTest
+static void testInvalidData() {
+    try {
+        insert invalidRecord;
+        System.assert(false, 'Expected validation error');
+    } catch (DmlException e) {
+        System.assert(e.getMessage().contains('validation'));
+    }
+}
+\`\`\`
+
+## Testing Async Operations 🚀
+
+### Testing Batch Classes
+\`\`\`apex
+@isTest
+static void testBatchExecution() {
+    Test.startTest();
+
+    Database.executeBatch(new MyBatch());
+
+    Test.stopTest();  // Forces batch to complete
+
+    // Assert batch results
+}
+\`\`\`
+
+### Mock HTTP Callouts
+\`\`\`apex
+public class MockHttpResponse implements HttpCalloutMock {
+    public HTTPResponse respond(HTTPRequest req) {
+        HttpResponse res = new HttpResponse();
+        res.setStatusCode(200);
+        res.setBody('{"status": "success"}');
+        return res;
+    }
+}
+
+@isTest
+static void testCallout() {
+    Test.setMock(HttpCalloutMock.class, new MockHttpResponse());
+    // Test your callout code
+}
+\`\`\`
+
+**Remember**: Great tests are your insurance policy against production failures!`,
+              resources: [
+                {
+                  title: 'Apex Testing Guide',
+                  type: 'documentation',
+                  url: 'https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_testing.htm',
+                  description: 'Complete guide to Apex testing best practices'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'testing-quiz',
+          title: 'Testing & Debugging Quiz',
+          questions: [
+            {
+              id: 'test-q1',
+              type: 'multiple-choice',
+              question: 'What is the minimum code coverage required for production deployment?',
+              options: ['50%', '65%', '75%', '90%'],
+              correctAnswer: '75%',
+              explanation: 'Salesforce requires a minimum of 75% code coverage for production deployments.',
+              points: 15,
+              difficulty: 'easy',
+              category: 'testing-basics'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
       }
     ]
   },
