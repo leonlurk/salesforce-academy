@@ -1542,6 +1542,872 @@ Coming up in our next modules:
           attempts: 0,
           maxAttempts: 3
         }
+      },
+      {
+        id: 'process-automation',
+        title: 'Process Automation Mastery',
+        description: 'Master Workflow Rules, Process Builder, Flow, and advanced automation',
+        duration: '2.5 weeks',
+        completed: false,
+        locked: true,
+        order: 2,
+        lessons: [
+          {
+            id: 'workflow-fundamentals',
+            title: 'Workflow Rules: Your First Automation Tool',
+            type: 'content',
+            duration: '35 min',
+            completed: false,
+            points: 300,
+            order: 1,
+            content: {
+              text: `# Welcome to Automation Heaven! ⚡
+
+Ready to become a Salesforce automation wizard? You're about to learn the tools that will make you the hero of your organization!
+
+## Why Automation Matters 🎯
+
+**The Problem**: Manual processes are time-consuming, error-prone, inconsistent, and hard to scale.
+
+**The Solution**: Salesforce automation tools save hundreds of hours per month, ensure consistency, and let humans focus on high-value work.
+
+## Workflow Rules: Your Foundation 🏗️
+
+**What are Workflow Rules?** Think of them as "If This, Then That" statements:
+- **IF** an opportunity reaches "Closed Won"
+- **THEN** send a congratulations email to the team
+
+### When to Use Workflow Rules:
+✅ Simple field updates
+✅ Email alerts
+✅ Task creation
+✅ Outbound messages to external systems
+
+## Real-World Examples 💼
+
+### Lead Nurturing Workflow
+**Trigger**: New lead created from website
+**Actions**: Send welcome email, create follow-up task, update lead source
+
+### Opportunity Escalation
+**Trigger**: High-value opportunity in negotiation
+**Actions**: Alert VP, create manager review task, mark as high-value deal
+
+### Best Practices ⭐
+- Use descriptive names
+- Test thoroughly in sandbox
+- Monitor performance impact
+- Document business logic
+
+**Remember**: Workflow rules are your automation foundation!`,
+              resources: [
+                {
+                  title: 'Workflow Rules Documentation',
+                  type: 'documentation',
+                  url: 'https://help.salesforce.com/articleView?id=workflow_rules_new.htm',
+                  description: 'Complete guide to workflow rules and actions'
+                }
+              ]
+            }
+          },
+          {
+            id: 'process-builder-advanced',
+            title: 'Process Builder: Visual Automation Powerhouse',
+            type: 'interactive',
+            duration: '40 min',
+            completed: false,
+            points: 350,
+            order: 2,
+            content: {
+              text: `# Process Builder: Where Automation Gets Visual! 🎨
+
+If Workflow Rules are like riding a bicycle, Process Builder is like driving a sports car!
+
+## Why Process Builder Rocks 🚀
+
+**Everything Workflow Rules Do, Plus**:
+✅ Create new records (any object!)
+✅ Update multiple objects in one process
+✅ Complex branching logic
+✅ Visual flow chart interface
+✅ Invoke other processes and flows
+
+## Building Your First Process 🛠️
+
+### Customer Onboarding Example
+**Goal**: When account becomes customer, automatically:
+1. Create onboarding case
+2. Post to Chatter
+3. Update account fields
+4. Schedule follow-up task
+
+### Advanced Patterns 💡
+
+**Multi-Object Updates**: Update account, contact, and custom objects in one process
+**Conditional Branching**: Different actions based on deal size or customer type
+**Scheduled Actions**: Contract renewals, follow-ups, reminders
+
+### Best Practices ⭐
+- Minimize process executions with specific criteria
+- Test with large data volumes
+- Use clear, descriptive names
+- Plan for governor limits
+
+**Pro Tip**: Salesforce is moving to Flow Builder - start planning your migration strategy!`,
+              interactive: [
+                {
+                  type: 'click-sequence',
+                  data: {
+                    title: 'Build Customer Onboarding Process',
+                    description: 'Create an automated customer onboarding workflow',
+                    steps: [
+                      {
+                        instruction: 'Navigate to Setup → Process Builder',
+                        hint: 'Use Quick Find to search for Process Builder'
+                      },
+                      {
+                        instruction: 'Click "New Process"',
+                        hint: 'Start with a fresh process definition'
+                      },
+                      {
+                        instruction: 'Select "A record changes" trigger',
+                        hint: 'This covers both create and edit scenarios'
+                      },
+                      {
+                        instruction: 'Add criteria: Account Type = Customer',
+                        hint: 'Only trigger when account becomes customer'
+                      },
+                      {
+                        instruction: 'Add Create Record action for Case',
+                        hint: 'Automate onboarding case creation'
+                      }
+                    ]
+                  },
+                  validation: {
+                    correctSequence: [1, 2, 3, 4, 5]
+                  },
+                  feedback: 'Excellent! You\'ve built your first automated process!'
+                }
+              ],
+              resources: [
+                {
+                  title: 'Process Builder Guide',
+                  type: 'documentation',
+                  url: 'https://help.salesforce.com/articleView?id=process_overview.htm',
+                  description: 'Complete Process Builder documentation'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'process-automation-quiz',
+          title: 'Process Automation Mastery Quiz',
+          questions: [
+            {
+              id: 'auto-q1',
+              type: 'multiple-choice',
+              question: 'Which automation tool can create new records when triggered?',
+              options: ['Workflow Rules', 'Process Builder', 'Validation Rules', 'Formula Fields'],
+              correctAnswer: 'Process Builder',
+              explanation: 'Process Builder can create new records, while Workflow Rules are limited to field updates, email alerts, tasks, and outbound messages.',
+              points: 20,
+              difficulty: 'medium',
+              category: 'automation'
+            },
+            {
+              id: 'auto-q2',
+              type: 'multiple-choice',
+              question: 'When should you use time-dependent workflow actions?',
+              options: [
+                'For immediate processing',
+                'To delay actions until specific times',
+                'When updating multiple objects',
+                'When creating new records'
+              ],
+              correctAnswer: 'To delay actions until specific times',
+              explanation: 'Time-dependent workflow actions are perfect for scheduled reminders, follow-ups, and date-based automations.',
+              points: 25,
+              difficulty: 'hard',
+              category: 'automation'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'data-management',
+        title: 'Data Management & Quality',
+        description: 'Master data import, export, cleaning, and quality management',
+        duration: '2 weeks',
+        completed: false,
+        locked: true,
+        order: 3,
+        lessons: [
+          {
+            id: 'data-import-mastery',
+            title: 'Data Import & Export: Gateway to Clean Data',
+            type: 'content',
+            duration: '40 min',
+            completed: false,
+            points: 350,
+            order: 1,
+            content: {
+              text: `# Data Management: Your Gateway to Clean, Reliable Data! 📊
+
+As a Salesforce Administrator, you're the guardian of data quality. Master data management and become the hero who keeps the business running smoothly!
+
+## Why Data Management Matters 💎
+
+**The Reality**:
+- 90% of business decisions rely on Salesforce data
+- Poor data quality costs companies $15M annually (average)
+- Bad data multiplies exponentially over time
+
+**Your Mission**: Ensure accuracy, maintain consistency, enable reliable reporting
+
+## Data Import Tools Arsenal 🛠️
+
+### 1. Data Import Wizard (The Beginner's Friend)
+**Best For**: Simple imports, up to 50,000 records
+**Supports**: Accounts, Contacts, Leads, Custom Objects
+**Strengths**: User-friendly, built-in duplicate detection, field mapping
+
+### 2. Data Loader (The Power User's Choice)
+**Best For**: Large imports, complex relationships, automation
+**Supports**: All objects, up to 5M records per operation
+**Strengths**: Handles any object, bulk operations, command-line automation
+
+### 3. Einstein Data Insights (The Smart Assistant)
+**Best For**: Data quality monitoring and recommendations
+**Features**: AI-powered recommendations, automated monitoring, data health scoring
+
+## Data Quality Management 🎯
+
+### Duplicate Management
+**Duplicate Rules**: Prevent duplicates at creation with real-time blocking
+**Duplicate Record Sets**: Identify and merge existing duplicates
+**Matching Criteria**: Name, email, phone (exact or fuzzy matching)
+
+### Validation Rules
+**Purpose**: Ensure data quality at entry point
+
+**Common Patterns**:
+- Email format validation
+- Phone number formatting
+- Required field combinations
+- Business logic enforcement
+
+### Data Standardization
+**Best Practices**:
+- Standardize state/country codes
+- Consistent phone formats: (555) 123-4567
+- Proper case name capitalization
+- Lowercase email domains
+
+## Advanced Techniques 🚀
+
+### External IDs
+**Purpose**: Connect Salesforce with external systems
+**Best Practice**: Use meaningful, stable identifiers (not Salesforce IDs)
+
+### Data Archiving Strategy
+**When to Archive**: Old inactive records, completed projects, performance optimization
+**Methods**: Export and delete, Big Objects, external storage, record flagging
+
+### Migration Projects
+**Phases**: Discovery → Design → Preparation → Execution → Optimization
+**Success Factors**: Data cleansing, test environment, validation strategy
+
+## Your Challenge 🎯
+Build a complete data management process for a company merger requiring 50,000 accounts and 200,000 contacts.
+
+**Remember**: Great administrators ensure data empowers great decisions!`,
+              resources: [
+                {
+                  title: 'Data Import Guide',
+                  type: 'documentation',
+                  url: 'https://help.salesforce.com/articleView?id=importing.htm',
+                  description: 'Complete guide to data import tools and best practices'
+                },
+                {
+                  title: 'Data Quality Trailhead',
+                  type: 'trailhead',
+                  url: 'https://trailhead.salesforce.com/content/learn/trails/data_quality',
+                  description: 'Hands-on data quality management practice'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'data-management-quiz',
+          title: 'Data Management & Quality Quiz',
+          questions: [
+            {
+              id: 'data-q1',
+              type: 'multiple-choice',
+              question: 'Which tool should you use to import 100,000 records with complex relationships?',
+              options: ['Data Import Wizard', 'Data Loader', 'Manual Entry', 'Excel Import'],
+              correctAnswer: 'Data Loader',
+              explanation: 'Data Loader is designed for large volume imports and can handle complex relationships through external IDs.',
+              points: 20,
+              difficulty: 'medium',
+              category: 'data-management'
+            },
+            {
+              id: 'data-q2',
+              type: 'multiple-choice',
+              question: 'What is the primary benefit of using External IDs?',
+              options: [
+                'Faster query performance',
+                'Better security',
+                'Integration with external systems',
+                'Reduced storage usage'
+              ],
+              correctAnswer: 'Integration with external systems',
+              explanation: 'External IDs enable upsert operations and provide stable references for integrating Salesforce with external systems.',
+              points: 25,
+              difficulty: 'hard',
+              category: 'integration'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'reports-dashboards',
+        title: 'Reports & Dashboards Mastery',
+        description: 'Create powerful reports, dashboards, and analytics for business insights',
+        duration: '2.5 weeks',
+        completed: false,
+        locked: true,
+        order: 4,
+        lessons: [
+          {
+            id: 'report-building-mastery',
+            title: 'Report Building: From Data to Insights',
+            type: 'content',
+            duration: '45 min',
+            completed: false,
+            points: 400,
+            order: 1,
+            content: {
+              text: `# Reports & Dashboards: Transform Data into Business Gold! 📈
+
+Welcome to Salesforce analytics! As an admin, you turn raw data into actionable insights that drive million-dollar business decisions.
+
+## Why Reports Matter to Business 💰
+
+**The Business Reality**:
+- CEOs make decisions based on your reports
+- Sales teams live by pipeline reports
+- Marketing measures ROI through campaign reports
+- Support tracks performance with case reports
+
+**Your Superpower**: Transform data into stories that drive action!
+
+## Report Types Deep Dive 📊
+
+### 1. Tabular Reports (The Foundation)
+**Best For**: Simple lists and basic analysis
+**Use Cases**: Contact lists, account directories, task reports
+**Strengths**: Fast, simple, great for data export
+
+### 2. Summary Reports (The Workhorse)
+**Best For**: Grouping and subtotals
+**Use Cases**: Sales by region, cases by priority, opportunities by stage
+**Features**: Group data, show subtotals, chart integration
+
+### 3. Matrix Reports (The Powerhouse)
+**Best For**: Cross-tabulation and complex analysis
+**Use Cases**: Sales by rep by month, cases by type by priority
+**Advanced**: Row and column grouping, multiple summary fields
+
+### 4. Joined Reports (The Integrator)
+**Best For**: Multiple report types in one view
+**Use Cases**: Account health (opportunities + cases + activities)
+**Power**: Multiple report blocks, shared filtering
+
+## Advanced Filtering & Logic 🎯
+
+### Filter Types
+**Standard Filters**: Field operator value comparisons
+**Cross Filters**: Accounts WITH Opportunities, Contacts WITHOUT Activities
+**Filter Logic**: Custom combinations with AND/OR operators
+
+### Date Filters Mastery
+**Relative Dates**: THIS_WEEK, LAST_MONTH, THIS_QUARTER (dynamic)
+**Date Ranges**: LAST_N_DAYS:30, NEXT_N_WEEKS:12
+**Fiscal Dates**: THIS_FISCAL_QUARTER, LAST_FISCAL_YEAR
+
+## Chart Types & Visualization 📊
+
+### Choosing the Right Chart
+**Column Charts**: Compare values across categories
+**Line Charts**: Show trends over time
+**Pie Charts**: Parts of whole (limit 5-7 slices)
+**Bar Charts**: Many categories or long labels
+**Funnel Charts**: Process progression
+
+### Chart Best Practices
+- Clear, descriptive titles
+- Meaningful axis labels
+- Consistent color schemes
+- Appropriate chart types for data
+- Mobile-friendly design
+
+## Dashboard Design Excellence 🎨
+
+### The 5-Second Rule
+Users should understand the key message in 5 seconds
+
+### Layout Patterns
+**Executive Dashboard**: High-level KPIs and gauges
+**Operational Dashboard**: Detailed analysis with supporting charts
+**Drill-Down Navigation**: Click charts to see underlying reports
+
+### Interactive Features
+**Dynamic Dashboards**: View data for different users
+**Dashboard Filters**: Date range, region, product line selectors
+**Real-Time Updates**: Refresh schedules and live data
+
+## Your Challenge 🎯
+Build a complete sales analytics solution with pipeline reports, performance dashboards, executive summaries, and forecast analysis.
+
+**Remember**: Great reports don't just show data - they tell stories that drive business success!`,
+              resources: [
+                {
+                  title: 'Reports and Dashboards Guide',
+                  type: 'documentation',
+                  url: 'https://help.salesforce.com/articleView?id=reports_dashboards.htm',
+                  description: 'Complete guide to Salesforce reporting and analytics'
+                },
+                {
+                  title: 'Analytics Trailhead',
+                  type: 'trailhead',
+                  url: 'https://trailhead.salesforce.com/content/learn/trails/wave_analytics_basics',
+                  description: 'Hands-on analytics and dashboard building'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'reports-quiz',
+          title: 'Reports & Dashboards Mastery Quiz',
+          questions: [
+            {
+              id: 'report-q1',
+              type: 'multiple-choice',
+              question: 'Which report type shows data across two dimensions like region and month?',
+              options: ['Tabular Report', 'Summary Report', 'Matrix Report', 'Joined Report'],
+              correctAnswer: 'Matrix Report',
+              explanation: 'Matrix reports allow cross-tabulation with row and column groupings, perfect for two-dimensional analysis.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'reporting'
+            },
+            {
+              id: 'report-q2',
+              type: 'multiple-choice',
+              question: 'What is the maximum recommended number of slices for a pie chart?',
+              options: ['3-4', '5-7', '8-10', 'No limit'],
+              correctAnswer: '5-7',
+              explanation: 'Pie charts become hard to read with too many slices. 5-7 slices is the sweet spot for clarity.',
+              points: 15,
+              difficulty: 'easy',
+              category: 'visualization'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'custom-objects-fields',
+        title: 'Custom Objects & Fields Mastery',
+        description: 'Design and build custom data models, objects, and fields',
+        duration: '2 weeks',
+        completed: false,
+        locked: true,
+        order: 5,
+        lessons: [
+          {
+            id: 'custom-object-architecture',
+            title: 'Custom Objects: Building Your Data Universe',
+            type: 'content',
+            duration: '40 min',
+            completed: false,
+            points: 350,
+            order: 1,
+            content: {
+              text: `# Custom Objects: Architect Your Business Data! 🏗️
+
+When standard objects don't fit your business needs, you become the architect of your own data universe!
+
+## When Standard Objects Aren't Enough 🤔
+
+**Standard Objects Handle**: CRM basics (Accounts, Contacts, Opportunities), standard processes (Cases, Leads), universal needs (Activities, Tasks)
+
+**Your Business Needs**:
+- Project management tracking
+- Inventory and asset management
+- Event and venue management
+- Training certification tracking
+- Equipment maintenance logs
+
+**Solution**: Custom Objects! 🎯
+
+## Design Philosophy: The Three Pillars 🎨
+
+### 1. Business Alignment
+- Solve real business problems
+- Model actual business processes
+- Support user workflows
+- Enable reporting and analytics
+
+### 2. Scalability
+- Plan for growth and data volumes
+- Design for performance
+- Allow for future enhancements
+
+### 3. User Experience
+- Intuitive field labels
+- Logical page layouts
+- Meaningful relationships
+- Simplicity over complexity
+
+## Field Types Master Guide 📝
+
+### Text Fields
+**Text (255 chars)**: Names, descriptions, IDs
+**Text Area (255 chars, multi-line)**: Short descriptions
+**Long Text Area (32K chars)**: Detailed descriptions
+**Rich Text Area**: Formatted text with HTML
+
+### Number Fields
+**Number**: Decimal places 0-18
+**Currency**: Respects user currency settings
+**Percent**: Automatic % symbol
+**Auto Number**: Automatically incremented sequences
+
+### Date and Time
+**Date**: Just the date
+**Date/Time**: Date and time combined
+**Time**: Hours and minutes only
+
+### Selection Fields
+**Picklist**: Single selection dropdown
+**Multi-Select Picklist**: Multiple selections
+**Checkbox**: True/False values
+
+### Relationship Fields
+**Lookup**: Optional link to another object
+**Master-Detail**: Strong parent-child relationship
+**Hierarchy**: Links to same object (like User to User)
+
+## Real-World Example: Project Management System 🌟
+
+### Objects Design
+**Project__c** (Master)
+- Project_Name__c, Description__c, Start_Date__c, End_Date__c
+- Status__c (Planning/Active/On Hold/Completed)
+- Project_Manager__c (Lookup to User)
+
+**Project_Task__c** (Detail to Project)
+- Task_Name__c, Due_Date__c, Assigned_To__c
+- Status__c, Priority__c, Estimated_Hours__c
+
+**Time_Entry__c** (Detail to Project_Task)
+- Date__c, Hours__c, Description__c
+- Billable__c (Checkbox)
+
+### Calculated Fields
+**Days_Remaining__c** (Formula): IF(End_Date__c > TODAY(), End_Date__c - TODAY(), 0)
+**Total_Hours__c** (Roll-up Summary): SUM(Project_Tasks__r.Actual_Hours__c)
+
+## Advanced Features 🚀
+
+### Record Types
+**When to Use**: Different page layouts, picklist values, or business processes for the same object
+**Example**: Internal Projects vs Client Projects with different approval processes
+
+### Page Layouts
+**Design Principles**: Group related fields, required fields at top, logical sections
+**Sections**: Project Information, Timeline, Budget & Resources
+
+### Validation Rules
+**Required Field Combinations**: End Date required for Active projects
+**Date Logic**: End Date must be after Start Date
+**Business Logic**: Completed projects must be 100% complete
+
+## Performance Considerations ⚡
+
+### Design for Scale
+**Limits**: 800 custom fields per object, 500 custom objects per org
+**Optimization**: Commonly filtered fields should be indexed
+**Storage**: Consider archiving strategies for old data
+
+### Governance Best Practices
+**Naming Conventions**: Descriptive names, consistent capitalization
+**Documentation**: Business purpose, key relationships, field definitions
+**Change Management**: Impact analysis, sandbox testing, user training
+
+## Your Challenge 🎯
+Design a complete Event Management System with Events, Sessions, Speakers, Attendees, and Sponsors - including proper relationships, validation rules, and automation.
+
+**Remember**: Custom objects transform Salesforce from CRM into a complete business platform!`,
+              resources: [
+                {
+                  title: 'Custom Objects Guide',
+                  type: 'documentation',
+                  url: 'https://help.salesforce.com/articleView?id=dev_objectcreate.htm',
+                  description: 'Complete guide to custom object creation and management'
+                },
+                {
+                  title: 'Data Modeling Trailhead',
+                  type: 'trailhead',
+                  url: 'https://trailhead.salesforce.com/content/learn/modules/data_modeling',
+                  description: 'Hands-on data modeling practice'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'custom-objects-quiz',
+          title: 'Custom Objects & Fields Quiz',
+          questions: [
+            {
+              id: 'custom-q1',
+              type: 'multiple-choice',
+              question: 'Which relationship type automatically deletes child records when parent is deleted?',
+              options: ['Lookup Relationship', 'Master-Detail Relationship', 'Hierarchy Relationship', 'External Relationship'],
+              correctAnswer: 'Master-Detail Relationship',
+              explanation: 'Master-Detail relationships create strong parent-child bonds where deleting the parent automatically deletes all child records.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'data-model'
+            },
+            {
+              id: 'custom-q2',
+              type: 'multiple-choice',
+              question: 'What is the maximum number of custom fields allowed per object?',
+              options: ['500', '800', '1000', 'Unlimited'],
+              correctAnswer: '800',
+              explanation: 'Each Salesforce object can have up to 800 custom fields, though performance may degrade with too many fields.',
+              points: 15,
+              difficulty: 'easy',
+              category: 'limits'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'app-builder-lightning',
+        title: 'App Builder & Lightning Pages',
+        description: 'Build custom Lightning applications and design modern user experiences',
+        duration: '2 weeks',
+        completed: false,
+        locked: true,
+        order: 6,
+        lessons: [
+          {
+            id: 'lightning-experience-design',
+            title: 'Lightning App Builder: Craft Amazing User Experiences',
+            type: 'content',
+            duration: '40 min',
+            completed: false,
+            points: 350,
+            order: 1,
+            content: {
+              text: `# Lightning App Builder: Your UX Superpower! ⚡
+
+Welcome to the future of Salesforce user experience! You're about to become a UX designer, crafting personalized experiences that make users love Salesforce.
+
+## The Lightning Revolution 🚀
+
+**Old Way (Classic)**:
+- Fixed page layouts
+- Limited customization
+- Developer-dependent changes
+- One layout for all users
+
+**Lightning Way**:
+- Drag-and-drop page building
+- Component-based architecture
+- Admin-driven customization
+- Personalized user experiences
+- Mobile-responsive design
+
+## Lightning Page Types 📱
+
+### 1. Record Pages
+**Purpose**: Display and edit individual records
+**Use Cases**: Account details, opportunity management, case resolution
+**Features**: Related lists, custom components, dynamic actions, contextual sidebar
+
+### 2. Home Pages
+**Purpose**: Dashboard and navigation hub
+**Use Cases**: Role-specific dashboards, KPI displays, quick access
+**Features**: Dashboard components, rich content, navigation shortcuts
+
+### 3. App Pages
+**Purpose**: Custom application experiences
+**Use Cases**: Specialized workflows, utility pages, custom tools
+**Features**: Full custom layout, no standard chrome, tab integration
+
+### 4. Email Application Panes
+**Purpose**: Salesforce integration within email clients
+**Use Cases**: Gmail/Outlook integration, email productivity
+**Features**: Compact layout, context-aware content, quick actions
+
+## Component Architecture 🧩
+
+### Standard Components
+**Display**: Record Detail, Related Lists, Rich Text, Related Record
+**Interactive**: Quick Actions, Buttons, Tabs, Accordion
+**Reporting**: Report Charts, Dashboards, Einstein Analytics, Metrics
+
+### Design Best Practices 🎨
+
+### User-Centered Design
+**Know Your Users**: Role-specific needs, daily workflows, pain points, device preferences
+**Design Principles**: Clarity (important info prominent), Efficiency (minimize clicks), Consistency (similar patterns)
+
+### Information Hierarchy
+**Primary Info**: Key fields, status, critical alerts
+**Secondary Info**: Related records, additional details
+**Tertiary Info**: History, audit, less frequent data
+
+### Mobile-First Design
+- Critical info in top sections
+- Larger touch targets
+- Simplified navigation
+- Reduced content density
+
+## Advanced Features ⚡
+
+### Dynamic Forms
+**Smart Field Display**: Show/hide fields based on values, required fields change by record type
+**Example**: Opportunity form showing different fields based on stage
+
+### Visibility Rules
+**Component Visibility**: Based on record criteria, user profiles, custom permissions, device type
+**Example**: Executive dashboard visible only to VP+ profiles
+
+### Page Variations
+**Audience Targeting**: Different layouts for different users, role-based experiences
+**Example**: Account page with Sales Rep focus vs Support Agent emphasis
+
+## Real-World Examples 🌟
+
+### Sales Rep Home Page
+**Objective**: Maximize sales productivity
+**Components**: Performance metrics, pipeline health, open opportunities, team leaderboard
+**Features**: Quick "Log a Call" action, "Hot opportunities" filter, mobile optimization
+
+### Support Case Record Page
+**Objective**: Efficient case resolution
+**Components**: Case priority/status, customer satisfaction, SLA countdown, communication history
+**Actions**: Quick status update, escalate to manager, send customer update
+
+## Activation Strategy 🚀
+
+### Assignment Priority
+1. App + Record Type + Profile (Most Specific)
+2. App + Record Type
+3. App + Profile
+4. Record Type + Profile
+5. Single criteria assignments
+6. Org Default (Least Specific)
+
+### Rollout Phases
+**Pilot**: Small group of power users
+**Department**: One team or department
+**Staged**: Gradual rollout by profile
+**Full**: Organization-wide deployment
+
+## Performance Optimization ⚡
+
+### Page Load Speed
+- Minimize components per page (< 15)
+- Reduce related list record counts
+- Optimize custom component performance
+- Filter data at source
+
+### Mobile Performance
+- Prioritize above-fold content
+- Minimize network requests
+- Test on various devices and connections
+
+## Your Challenge 🎯
+Design a complete Sales Operations Hub with executive dashboard, rep performance pages, pipeline management, activity tracking, and team collaboration features.
+
+**Success Metrics**: Reduced time to find information, increased adoption, improved data quality, higher productivity
+
+**Remember**: Great Lightning pages create experiences that make users more productive, informed, and successful!
+
+🎉 **Congratulations! You've completed the Salesforce Administrator path!**
+
+You're now equipped to transform any Salesforce org into a user experience masterpiece! ✨`,
+              resources: [
+                {
+                  title: 'Lightning App Builder Guide',
+                  type: 'documentation',
+                  url: 'https://help.salesforce.com/articleView?id=lightning_app_builder.htm',
+                  description: 'Complete guide to Lightning App Builder'
+                },
+                {
+                  title: 'Lightning Experience Trailhead',
+                  type: 'trailhead',
+                  url: 'https://trailhead.salesforce.com/content/learn/trails/lex_admin_implementation',
+                  description: 'Hands-on Lightning Experience implementation'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'lightning-quiz',
+          title: 'App Builder & Lightning Pages Quiz',
+          questions: [
+            {
+              id: 'lightning-q1',
+              type: 'multiple-choice',
+              question: 'Which Lightning page type should you use for role-specific dashboards?',
+              options: ['Record Page', 'Home Page', 'App Page', 'Email Application Pane'],
+              correctAnswer: 'Home Page',
+              explanation: 'Home pages are designed for dashboard and navigation hub purposes, perfect for role-specific dashboards.',
+              points: 20,
+              difficulty: 'medium',
+              category: 'lightning'
+            },
+            {
+              id: 'lightning-q2',
+              type: 'multiple-choice',
+              question: 'What is the recommended maximum number of components per Lightning page?',
+              options: ['10', '15', '20', '25'],
+              correctAnswer: '15',
+              explanation: 'Keeping components under 15 per page helps maintain good performance and user experience.',
+              points: 15,
+              difficulty: 'easy',
+              category: 'performance'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
       }
     ]
   },
