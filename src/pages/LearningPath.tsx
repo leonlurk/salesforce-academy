@@ -13,12 +13,26 @@ import {
 } from 'lucide-react';
 import { learningPaths } from '../data/learningPaths';
 import { useUser } from '../context/UserContext';
+import { useProgressStore } from '../store/progressStore';
 
 const LearningPath: React.FC = () => {
   const { pathId } = useParams<{ pathId: string }>();
   const { user } = useUser();
+  const { getPathProgress, isPathUnlocked, isModuleUnlocked, isLessonCompleted, initializeModulesForPath } = useProgressStore();
 
   const path = learningPaths.find(p => p.id === pathId);
+  const pathProgress = pathId ? getPathProgress(pathId) : undefined;
+
+  // Initialize modules for this path when component loads
+  React.useEffect(() => {
+    if (pathId && path) {
+      const modules = path.modules.map(m => ({
+        id: m.id,
+        lessons: m.lessons.map(l => ({ id: l.id }))
+      }));
+      initializeModulesForPath(pathId, modules);
+    }
+  }, [pathId, path, initializeModulesForPath]);
 
   if (!path) {
     return (
@@ -30,13 +44,17 @@ const LearningPath: React.FC = () => {
     );
   }
 
-  const completedModules = path.modules.filter(m => m.completed).length;
+  const completedModules = path.modules.filter(m =>
+    pathId ? (pathProgress?.modules[m.id]?.completed || m.completed) : m.completed
+  ).length;
   const totalModules = path.modules.length;
   const overallProgress = (completedModules / totalModules) * 100;
 
-  const isUnlocked = path.prerequisites.every(prereq =>
-    user.completedLessons.some(lesson => lesson.includes(prereq))
-  ) || path.prerequisites.length === 0;
+  const isUnlocked = pathId ? isPathUnlocked(pathId) : (
+    path.prerequisites.every(prereq =>
+      user.completedLessons.some(lesson => lesson.includes(prereq))
+    ) || path.prerequisites.length === 0
+  );
 
   return (
     <div className="space-y-8">
@@ -144,10 +162,15 @@ const LearningPath: React.FC = () => {
 
         <div className="space-y-6">
           {path.modules.map((module, index) => {
-            const completedLessons = module.lessons.filter(l => l.completed).length;
+            const completedLessons = module.lessons.filter(l =>
+              pathId ? isLessonCompleted(pathId, module.id, l.id) || l.completed : l.completed
+            ).length;
             const totalLessons = module.lessons.length;
             const moduleProgress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
-            const isModuleUnlocked = isUnlocked && (!module.locked || index === 0 || path.modules[index - 1].completed);
+            const moduleCompleted = pathId ? (pathProgress?.modules[module.id]?.completed || module.completed) : module.completed;
+            const isModuleUnlockedNew = pathId ? isModuleUnlocked(pathId, module.id) : false;
+            const isModuleUnlockedLegacy = isUnlocked && (!module.locked || index === 0 || path.modules[index - 1].completed);
+            const isModuleUnlockedFinal = isModuleUnlockedNew || isModuleUnlockedLegacy;
 
             return (
               <motion.div
@@ -155,20 +178,20 @@ const LearningPath: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className={`card ${!isModuleUnlocked ? 'opacity-60' : ''}`}
+                className={`card ${!isModuleUnlockedFinal ? 'opacity-60' : ''}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4 flex-1">
                     <div className={`flex items-center justify-center w-12 h-12 rounded-lg ${
-                      module.completed
+                      moduleCompleted
                         ? 'bg-green-100 dark:bg-green-900'
-                        : isModuleUnlocked
+                        : isModuleUnlockedFinal
                         ? 'bg-primary-100 dark:bg-primary-900'
                         : 'bg-gray-100 dark:bg-gray-700'
                     }`}>
-                      {module.completed ? (
+                      {moduleCompleted ? (
                         <CheckCircle className="w-6 h-6 text-green-600" />
-                      ) : isModuleUnlocked ? (
+                      ) : isModuleUnlockedFinal ? (
                         <BookOpen className="w-6 h-6 text-primary-600" />
                       ) : (
                         <Lock className="w-6 h-6 text-gray-400" />
@@ -189,7 +212,7 @@ const LearningPath: React.FC = () => {
                         {module.description}
                       </p>
 
-                      {isModuleUnlocked && (
+                      {isModuleUnlockedFinal && (
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -216,11 +239,11 @@ const LearningPath: React.FC = () => {
                               >
                                 <div className="flex items-center space-x-3">
                                   <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                    lesson.completed
+                                    (pathId && isLessonCompleted(pathId, module.id, lesson.id)) || lesson.completed
                                       ? 'bg-green-100 dark:bg-green-900'
                                       : 'bg-gray-100 dark:bg-gray-700'
                                   }`}>
-                                    {lesson.completed ? (
+                                    {(pathId && isLessonCompleted(pathId, module.id, lesson.id)) || lesson.completed ? (
                                       <CheckCircle className="w-3 h-3 text-green-600" />
                                     ) : (
                                       <Play className="w-3 h-3 text-gray-500" />
@@ -249,13 +272,13 @@ const LearningPath: React.FC = () => {
                     </div>
                   </div>
 
-                  {isModuleUnlocked && (
+                  {isModuleUnlockedFinal && (
                     <div className="flex flex-col space-y-2">
                       <Link
                         to={`/path/${pathId}/module/${module.id}/lesson/${module.lessons[0]?.id}`}
                         className="btn-primary"
                       >
-                        {module.completed ? 'Review' : completedLessons > 0 ? 'Continue' : 'Start'}
+                        {moduleCompleted ? 'Review' : completedLessons > 0 ? 'Continue' : 'Start'}
                       </Link>
                       {module.quiz && (
                         <Link

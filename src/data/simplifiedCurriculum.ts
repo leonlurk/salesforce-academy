@@ -4407,7 +4407,7 @@ jobs:
 
     - name: Authenticate to Dev Hub
       run: |
-        echo "${{ secrets.DEVHUB_SFDX_URL }}" > ./DEVHUB_SFDX_URL.txt
+        echo "$\\{\\{ secrets.DEVHUB_SFDX_URL \\}\\}" > ./DEVHUB_SFDX_URL.txt
         sfdx force:auth:sfdxurl:store --sfdxurlfile ./DEVHUB_SFDX_URL.txt --setdefaultdevhubusername --setalias devhub
 
     - name: Create scratch org
@@ -4447,7 +4447,7 @@ jobs:
 
     - name: Authenticate to sandbox
       run: |
-        echo "${{ secrets.SANDBOX_SFDX_URL }}" > ./SANDBOX_SFDX_URL.txt
+        echo "$\\{\\{ secrets.SANDBOX_SFDX_URL \\}\\}" > ./SANDBOX_SFDX_URL.txt
         sfdx force:auth:sfdxurl:store --sfdxurlfile ./SANDBOX_SFDX_URL.txt --setdefaultusername --setalias sandbox
 
     - name: Deploy to sandbox
@@ -4465,7 +4465,7 @@ jobs:
 
     - name: Validate production deployment
       run: |
-        echo "${{ secrets.PRODUCTION_SFDX_URL }}" > ./PRODUCTION_SFDX_URL.txt
+        echo "$\\{\\{ secrets.PRODUCTION_SFDX_URL \\}\\}" > ./PRODUCTION_SFDX_URL.txt
         sfdx force:auth:sfdxurl:store --sfdxurlfile ./PRODUCTION_SFDX_URL.txt --setdefaultusername --setalias production
         sfdx force:source:deploy --targetusername production --manifest manifest/package.xml --wait 30 --testlevel RunLocalTests --checkonly
 \`\`\`
@@ -4823,6 +4823,1357 @@ Time to automate everything! ⚙️`,
             }
           ],
           passingScore: 80,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'database-soql-optimization',
+        title: 'Database & SOQL Optimization',
+        description: 'Master advanced SOQL, database optimization, and performance tuning techniques',
+        duration: '3 weeks',
+        completed: false,
+        locked: true,
+        order: 7,
+        lessons: [
+          {
+            id: 'advanced-soql-performance',
+            title: 'Advanced SOQL & Database Performance: Query Like a Pro',
+            type: 'content',
+            duration: '45 min',
+            completed: false,
+            points: 400,
+            order: 1,
+            content: {
+              text: `# Advanced SOQL: Query Performance Mastery! 🚀
+
+Welcome to the world of high-performance database operations!
+
+Ready to write SOQL queries that scale to millions of records? Today you'll learn advanced querying techniques, performance optimization, and how to make your Salesforce database sing at enterprise scale.
+
+## SOQL vs SQL: The Salesforce Difference 🤔
+
+While SOQL looks like SQL, it's designed specifically for Salesforce's multi-tenant architecture:
+
+### SOQL Advantages:
+- **Governor limit protection** - Prevents runaway queries
+- **Automatic security** - Respects sharing rules
+- **Relationship navigation** - Built-in join capabilities
+- **Type safety** - Strong integration with Apex
+
+### SOQL Limitations:
+- **No complex joins** - Limited to relationship queries
+- **No unions** - Can't combine result sets
+- **Limited functions** - Fewer aggregate functions than SQL
+- **Governor limits** - Query complexity restrictions
+
+## Advanced SOQL Query Patterns 🎯
+
+### 1. **Efficient Relationship Queries**
+
+\`\`\`apex
+// ❌ Inefficient: Multiple queries
+List<Account> accounts = [SELECT Id, Name FROM Account LIMIT 100];
+for (Account acc : accounts) {
+    List<Contact> contacts = [SELECT Id, Name FROM Contact WHERE AccountId = :acc.Id];
+    // Process contacts
+}
+
+// ✅ Efficient: Single query with subquery
+List<Account> accounts = [
+    SELECT Id, Name,
+           (SELECT Id, Name, Email FROM Contacts)
+    FROM Account
+    LIMIT 100
+];
+
+for (Account acc : accounts) {
+    for (Contact con : acc.Contacts) {
+        // Process contacts - no additional queries
+    }
+}
+\`\`\`
+
+### 2. **Selective Query Optimization**
+
+\`\`\`apex
+// ❌ Non-selective: Scans entire table
+SELECT Id, Name FROM Account WHERE Industry = 'Technology'
+
+// ✅ Selective: Uses indexed fields
+SELECT Id, Name FROM Account
+WHERE CreatedDate = TODAY
+AND OwnerId = :UserInfo.getUserId()
+
+// ✅ Selective: Compound conditions
+SELECT Id, Name FROM Account
+WHERE Id IN :accountIds
+AND LastModifiedDate > :yesterday
+
+// ✅ Selective: Parent-to-child with limits
+SELECT Id, Name,
+       (SELECT Id, Name FROM Contacts
+        WHERE Email != null
+        ORDER BY LastModifiedDate DESC
+        LIMIT 5)
+FROM Account
+WHERE Id IN :selectedAccountIds
+\`\`\`
+
+### 3. **Aggregate Query Mastery**
+
+\`\`\`apex
+// Revenue analysis by industry
+List<AggregateResult> industryRevenue = [
+    SELECT Industry,
+           COUNT(Id) AccountCount,
+           SUM(AnnualRevenue) TotalRevenue,
+           AVG(AnnualRevenue) AvgRevenue,
+           MAX(AnnualRevenue) MaxRevenue
+    FROM Account
+    WHERE AnnualRevenue > 0
+    GROUP BY Industry
+    ORDER BY SUM(AnnualRevenue) DESC
+    LIMIT 10
+];
+
+for (AggregateResult ar : industryRevenue) {
+    String industry = (String) ar.get('Industry');
+    Decimal totalRevenue = (Decimal) ar.get('TotalRevenue');
+    Integer accountCount = (Integer) ar.get('AccountCount');
+
+    System.debug(industry + ': ' + accountCount + ' accounts, $' + totalRevenue);
+}
+
+// Opportunity pipeline analysis
+List<AggregateResult> pipelineByStage = [
+    SELECT StageName,
+           COUNT(Id) OpportunityCount,
+           SUM(Amount) PipelineValue,
+           AVG(Amount) AvgDealSize
+    FROM Opportunity
+    WHERE CloseDate >= :Date.today()
+    AND CloseDate <= :Date.today().addMonths(12)
+    GROUP BY StageName
+    ORDER BY SUM(Amount) DESC
+];
+\`\`\`
+
+### 4. **Dynamic SOQL for Flexible Queries**
+
+\`\`\`apex
+public class DynamicQueryBuilder {
+    public static List<SObject> buildAccountQuery(
+        Set<String> fields,
+        Map<String, Object> filters,
+        String orderBy,
+        Integer limitCount
+    ) {
+        // Build SELECT clause
+        String selectClause = 'SELECT ' + String.join(new List<String>(fields), ', ');
+
+        // Build FROM clause
+        String fromClause = ' FROM Account';
+
+        // Build WHERE clause
+        String whereClause = '';
+        List<String> conditions = new List<String>();
+
+        for (String field : filters.keySet()) {
+            Object value = filters.get(field);
+            if (value instanceof String) {
+                conditions.add(field + ' = \\'' + String.escapeSingleQuotes((String)value) + '\\'');
+            } else if (value instanceof List<String>) {
+                List<String> stringValues = (List<String>) value;
+                conditions.add(field + ' IN (\\'' + String.join(stringValues, '\\',\\'') + '\\')');
+            } else {
+                conditions.add(field + ' = :value');
+            }
+        }
+
+        if (!conditions.isEmpty()) {
+            whereClause = ' WHERE ' + String.join(conditions, ' AND ');
+        }
+
+        // Build ORDER BY clause
+        String orderClause = String.isNotBlank(orderBy) ? ' ORDER BY ' + orderBy : '';
+
+        // Build LIMIT clause
+        String limitClause = limitCount != null ? ' LIMIT ' + limitCount : '';
+
+        // Construct final query
+        String queryString = selectClause + fromClause + whereClause + orderClause + limitClause;
+
+        System.debug('Dynamic Query: ' + queryString);
+        return Database.query(queryString);
+    }
+
+    // Usage example
+    public static List<Account> getAccountsByIndustryAndRevenue() {
+        Set<String> fields = new Set<String>{'Id', 'Name', 'Industry', 'AnnualRevenue'};
+        Map<String, Object> filters = new Map<String, Object>{
+            'Industry' => new List<String>{'Technology', 'Healthcare'},
+            'AnnualRevenue' => 1000000
+        };
+
+        return buildAccountQuery(fields, filters, 'AnnualRevenue DESC', 50);
+    }
+}
+\`\`\`
+
+## Query Performance Optimization 📊
+
+### 1. **Index Usage Strategy**
+
+\`\`\`apex
+// ✅ Uses standard indexes (Id, Name, Email fields)
+SELECT Id, Name FROM Contact WHERE Email = 'john@company.com'
+
+// ✅ Uses date indexes
+SELECT Id, Name FROM Account WHERE CreatedDate = TODAY
+
+// ✅ Uses owner indexes
+SELECT Id, Name FROM Opportunity WHERE OwnerId = :UserInfo.getUserId()
+
+// ❌ No index available - will scan entire table
+SELECT Id, Name FROM Account WHERE Description LIKE '%technology%'
+
+// ✅ Better: Use a indexed field + filter
+SELECT Id, Name FROM Account
+WHERE Industry = 'Technology'
+AND Description LIKE '%innovation%'
+\`\`\`
+
+### 2. **Custom Index Creation**
+
+For frequently queried custom fields, request custom indexes:
+
+\`\`\`apex
+// If you frequently query by External_ID__c
+SELECT Id, Name FROM Account WHERE External_ID__c = 'EXT123'
+
+// Contact Salesforce Support to create custom index on External_ID__c
+// Performance improves from 10+ seconds to milliseconds
+\`\`\`
+
+### 3. **Query Plan Analysis**
+
+\`\`\`apex
+// Enable query plan in Developer Console
+// Query → Query Plan tab shows:
+// - Leading Operation Type (Index, TableScan)
+// - Cardinality (estimated rows)
+// - Cost (relative performance)
+
+// Example analysis:
+// Query: SELECT Id FROM Account WHERE Industry = 'Technology'
+// Plan: TableScan | Cardinality: 10000 | Cost: 785
+// Solution: Add WHERE CreatedDate >= LAST_N_DAYS:30 for selectivity
+\`\`\`
+
+## Bulk Data Processing Patterns 🏋️
+
+### 1. **Efficient Batch Processing**
+
+\`\`\`apex
+public class AccountDataProcessor implements Database.Batchable<SObject> {
+
+    public Database.QueryLocator start(Database.BatchableContext bc) {
+        // Efficient query with selective WHERE clause
+        return Database.getQueryLocator([
+            SELECT Id, Name, Industry, AnnualRevenue,
+                   (SELECT Id, Name FROM Contacts WHERE Email != null LIMIT 5)
+            FROM Account
+            WHERE LastModifiedDate >= :Date.today().addDays(-7)
+            AND Industry != null
+        ]);
+    }
+
+    public void execute(Database.BatchableContext bc, List<Account> accounts) {
+        List<Account> accountsToUpdate = new List<Account>();
+        List<Contact> contactsToUpdate = new List<Contact>();
+
+        for (Account acc : accounts) {
+            // Process account
+            if (acc.AnnualRevenue == null) {
+                acc.Revenue_Status__c = 'Unknown';
+                accountsToUpdate.add(acc);
+            }
+
+            // Process related contacts
+            for (Contact con : acc.Contacts) {
+                con.Account_Industry__c = acc.Industry;
+                contactsToUpdate.add(con);
+            }
+        }
+
+        // Bulk DML operations
+        if (!accountsToUpdate.isEmpty()) {
+            Database.update(accountsToUpdate, false); // Allow partial success
+        }
+
+        if (!contactsToUpdate.isEmpty()) {
+            Database.update(contactsToUpdate, false);
+        }
+    }
+
+    public void finish(Database.BatchableContext bc) {
+        // Send completion email or trigger next process
+        AsyncApexJob job = [SELECT Status, NumberOfErrors, JobItemsProcessed
+                           FROM AsyncApexJob WHERE Id = :bc.getJobId()];
+
+        System.debug('Batch completed: ' + job.Status +
+                    ', Processed: ' + job.JobItemsProcessed +
+                    ', Errors: ' + job.NumberOfErrors);
+    }
+}
+
+// Execute batch
+AccountDataProcessor processor = new AccountDataProcessor();
+Database.executeBatch(processor, 200); // Optimal batch size
+\`\`\`
+
+### 2. **Query Cursor for Large Datasets**
+
+\`\`\`apex
+public class LargeDataProcessor {
+    public static void processAllAccounts() {
+        // For very large datasets, use Database.getQueryLocator
+        Database.QueryLocator queryLocator = Database.getQueryLocator([
+            SELECT Id, Name, Industry FROM Account ORDER BY Id
+        ]);
+
+        Database.QueryLocatorIterator iterator = queryLocator.iterator();
+        Integer batchSize = 200;
+
+        while (iterator.hasNext()) {
+            List<Account> batch = new List<Account>();
+
+            // Collect batch
+            for (Integer i = 0; i < batchSize && iterator.hasNext(); i++) {
+                batch.add((Account) iterator.next());
+            }
+
+            // Process batch
+            processBatch(batch);
+        }
+    }
+
+    private static void processBatch(List<Account> accounts) {
+        // Your processing logic here
+        for (Account acc : accounts) {
+            // Process individual account
+        }
+    }
+}
+\`\`\`
+
+## SOQL Injection Prevention 🛡️
+
+### 1. **Secure Dynamic Queries**
+
+\`\`\`apex
+// ❌ VULNERABLE: Direct concatenation
+public List<Account> searchAccounts(String userInput) {
+    String query = 'SELECT Id, Name FROM Account WHERE Name = \\'' + userInput + '\\'';
+    return Database.query(query); // SOQL Injection risk!
+}
+
+// ✅ SECURE: Use bind variables
+public List<Account> searchAccountsSecure(String searchTerm) {
+    return [SELECT Id, Name FROM Account WHERE Name = :searchTerm];
+}
+
+// ✅ SECURE: Escape user input
+public List<Account> searchAccountsDynamic(String userInput) {
+    String escapedInput = String.escapeSingleQuotes(userInput);
+    String query = 'SELECT Id, Name FROM Account WHERE Name LIKE \\'%' + escapedInput + '%\\'';
+    return Database.query(query);
+}
+
+// ✅ SECURE: Validate input
+public List<Account> searchAccountsValidated(String searchTerm) {
+    // Validate input
+    if (String.isBlank(searchTerm) || searchTerm.length() > 255) {
+        throw new IllegalArgumentException('Invalid search term');
+    }
+
+    // Use pattern matching for allowed characters
+    Pattern allowedPattern = Pattern.compile('^[a-zA-Z0-9\\\\s\\\\-\\\\.]+$');
+    if (!allowedPattern.matcher(searchTerm).matches()) {
+        throw new IllegalArgumentException('Search term contains invalid characters');
+    }
+
+    return [SELECT Id, Name FROM Account WHERE Name LIKE :('%' + searchTerm + '%')];
+}
+\`\`\`
+
+## Performance Monitoring & Debugging 📈
+
+### 1. **Query Performance Metrics**
+
+\`\`\`apex
+public class QueryPerformanceMonitor {
+    public static void trackQueryPerformance(String queryType) {
+        Long startTime = System.currentTimeMillis();
+
+        // Execute your query
+        List<Account> results = [SELECT Id, Name FROM Account LIMIT 1000];
+
+        Long endTime = System.currentTimeMillis();
+        Long executionTime = endTime - startTime;
+
+        // Log performance metrics
+        Performance_Log__c log = new Performance_Log__c(
+            Query_Type__c = queryType,
+            Execution_Time_Ms__c = executionTime,
+            Record_Count__c = results.size(),
+            SOQL_Queries_Used__c = Limits.getQueries(),
+            Heap_Size_Used__c = Limits.getHeapSize(),
+            CPU_Time_Used__c = Limits.getCpuTime()
+        );
+
+        insert log;
+
+        // Alert if performance degrades
+        if (executionTime > 5000) { // 5 seconds
+            System.debug(LoggingLevel.WARN,
+                'Slow query detected: ' + queryType + ' took ' + executionTime + 'ms');
+        }
+    }
+}
+\`\`\`
+
+### 2. **Governor Limit Monitoring**
+
+\`\`\`apex
+public class GovernorLimitMonitor {
+    public static void logLimitUsage(String operation) {
+        System.debug('=== Governor Limit Usage: ' + operation + ' ===');
+        System.debug('SOQL Queries: ' + Limits.getQueries() + '/' + Limits.getLimitQueries());
+        System.debug('DML Statements: ' + Limits.getDmlStatements() + '/' + Limits.getLimitDmlStatements());
+        System.debug('DML Rows: ' + Limits.getDmlRows() + '/' + Limits.getLimitDmlRows());
+        System.debug('Heap Size: ' + Limits.getHeapSize() + '/' + Limits.getLimitHeapSize());
+        System.debug('CPU Time: ' + Limits.getCpuTime() + '/' + Limits.getLimitCpuTime());
+
+        // Check if approaching limits
+        if (Limits.getQueries() > Limits.getLimitQueries() * 0.8) {
+            System.debug(LoggingLevel.WARN, 'Approaching SOQL query limit!');
+        }
+
+        if (Limits.getHeapSize() > Limits.getLimitHeapSize() * 0.8) {
+            System.debug(LoggingLevel.WARN, 'Approaching heap size limit!');
+        }
+    }
+}
+\`\`\`
+
+## Advanced Query Techniques 🎯
+
+### 1. **Polymorphic Relationships**
+
+\`\`\`apex
+// Query polymorphic relationships (What/Who fields)
+List<Task> tasks = [
+    SELECT Id, Subject, WhatId, What.Type, WhoId, Who.Type
+    FROM Task
+    WHERE CreatedDate = TODAY
+];
+
+for (Task t : tasks) {
+    if (t.What?.Type == 'Account') {
+        System.debug('Task related to Account: ' + t.WhatId);
+    } else if (t.What?.Type == 'Opportunity') {
+        System.debug('Task related to Opportunity: ' + t.WhatId);
+    }
+}
+\`\`\`
+
+### 2. **Date and Time Functions**
+
+\`\`\`apex
+// Advanced date filtering
+List<Opportunity> opportunities = [
+    SELECT Id, Name, CloseDate, Amount
+    FROM Opportunity
+    WHERE CloseDate >= THIS_QUARTER
+    AND CloseDate <= NEXT_N_QUARTERS:2
+    AND CALENDAR_MONTH(CloseDate) IN (6, 7, 8) // Summer months
+    ORDER BY FISCAL_QUARTER(CloseDate), Amount DESC
+];
+
+// Relative date queries
+List<Account> recentAccounts = [
+    SELECT Id, Name, CreatedDate
+    FROM Account
+    WHERE CreatedDate >= LAST_N_DAYS:30
+    AND LastModifiedDate >= YESTERDAY
+];
+\`\`\`
+
+### 3. **Field-to-Field Comparisons**
+
+\`\`\`apex
+// Compare fields within the same record
+List<Opportunity> staleOpportunities = [
+    SELECT Id, Name, Amount, LastModifiedDate, CreatedDate
+    FROM Opportunity
+    WHERE LastModifiedDate = CreatedDate  // Never been modified
+    AND CreatedDate < LAST_N_DAYS:90
+    AND StageName != 'Closed Won'
+    AND StageName != 'Closed Lost'
+];
+\`\`\`
+
+## Next Steps 🚀
+
+Coming up in our Database Mastery journey:
+- **Custom metadata types** for configuration management
+- **Platform Cache** for performance optimization
+- **Change Data Capture** for real-time data sync
+- **Big Objects** for massive data storage
+- **External Objects** for real-time external data
+- **Einstein Analytics** SAQL queries
+
+**Remember**: Great database performance isn't just about writing fast queries - it's about designing efficient data models, using appropriate indexes, and building scalable solutions that perform well as your org grows! 💪
+
+Time to query like a database master! 🗄️`,
+              resources: [
+                {
+                  title: 'SOQL and SOSL Reference',
+                  type: 'documentation',
+                  url: 'https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/',
+                  description: 'Complete SOQL and SOSL syntax reference'
+                },
+                {
+                  title: 'Query Performance Best Practices',
+                  type: 'trailhead',
+                  url: 'https://trailhead.salesforce.com/content/learn/modules/database_basics_dotnet',
+                  description: 'Learn query optimization and performance tuning'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'database-soql-quiz',
+          title: 'Database & SOQL Optimization Quiz',
+          questions: [
+            {
+              id: 'soql-q1',
+              type: 'multiple-choice',
+              question: 'Which query pattern is most efficient for processing related records?',
+              options: [
+                'Multiple SOQL queries in a loop',
+                'Single query with subquery relationship',
+                'Separate queries for parent and child records',
+                'Dynamic SOQL with string concatenation'
+              ],
+              correctAnswer: 'Single query with subquery relationship',
+              explanation: 'Subquery relationships allow you to fetch parent and child records in a single query, avoiding the N+1 query problem and staying within governor limits.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'soql-optimization'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'security-best-practices',
+        title: 'Security & Best Practices',
+        description: 'Master enterprise security, compliance, and development best practices',
+        duration: '3 weeks',
+        completed: false,
+        locked: true,
+        order: 8,
+        lessons: [
+          {
+            id: 'enterprise-security-patterns',
+            title: 'Enterprise Security: Protecting Data at Scale',
+            type: 'content',
+            duration: '50 min',
+            completed: false,
+            points: 450,
+            order: 1,
+            content: {
+              text: `# Enterprise Security: Your Digital Fortress! 🛡️
+
+Welcome to the world of enterprise-grade security!
+
+Ready to build Salesforce solutions that protect sensitive data, comply with regulations, and scale securely across global organizations? Today you'll master the security patterns that separate amateur developers from trusted enterprise architects.
+
+## The Security Mindset 🧠
+
+### Security by Design Principles:
+
+**1. Principle of Least Privilege** 🔒
+- Users get minimum access needed for their job
+- Permissions granted explicitly, not by default
+- Regular access reviews and cleanup
+
+**2. Defense in Depth** 🏰
+- Multiple security layers protect data
+- If one layer fails, others provide protection
+- Network, application, and data security
+
+**3. Zero Trust Architecture** 🚫
+- Never trust, always verify
+- Authenticate and authorize every request
+- Monitor all access patterns
+
+**4. Data Classification** 📊
+- Identify sensitive data types
+- Apply appropriate protection levels
+- Implement data handling policies
+
+## Salesforce Security Model Deep Dive 🏗️
+
+### 1. **Organization-Wide Defaults (OWDs)**
+
+\`\`\`apex
+// Understanding OWD settings programmatically
+public class SecurityAuditService {
+
+    public static Map<String, String> getOrgWideDefaults() {
+        Map<String, String> owdSettings = new Map<String, String>();
+
+        // Query organization-wide defaults
+        List<Organization> org = [
+            SELECT DefaultAccountAccess, DefaultContactAccess,
+                   DefaultOpportunityAccess, DefaultLeadAccess,
+                   DefaultCaseAccess, DefaultCampaignAccess
+            FROM Organization
+            LIMIT 1
+        ];
+
+        if (!org.isEmpty()) {
+            owdSettings.put('Account', org[0].DefaultAccountAccess);
+            owdSettings.put('Contact', org[0].DefaultContactAccess);
+            owdSettings.put('Opportunity', org[0].DefaultOpportunityAccess);
+            owdSettings.put('Lead', org[0].DefaultLeadAccess);
+            owdSettings.put('Case', org[0].DefaultCaseAccess);
+            owdSettings.put('Campaign', org[0].DefaultCampaignAccess);
+        }
+
+        return owdSettings;
+    }
+
+    public static void auditSecuritySettings() {
+        Map<String, String> owdSettings = getOrgWideDefaults();
+
+        for (String objectType : owdSettings.keySet()) {
+            String access = owdSettings.get(objectType);
+
+            if (access == 'Public Full Access') {
+                System.debug(LoggingLevel.WARN,
+                    objectType + ' has Public Full Access - Review required!');
+            }
+        }
+    }
+}
+\`\`\`
+
+### 2. **Advanced Sharing Rules**
+
+\`\`\`apex
+// Programmatic sharing for complex scenarios
+public class AccountSharingService {
+
+    public static void shareAccountsWithRegionalTeams() {
+        // Get accounts that need regional sharing
+        List<Account> accounts = [
+            SELECT Id, BillingCountry, Industry
+            FROM Account
+            WHERE Regional_Sharing_Required__c = true
+        ];
+
+        // Get regional users
+        Map<String, List<User>> usersByRegion = getUsersByRegion();
+
+        List<AccountShare> sharesToInsert = new List<AccountShare>();
+
+        for (Account acc : accounts) {
+            String region = getRegionFromCountry(acc.BillingCountry);
+            List<User> regionalUsers = usersByRegion.get(region);
+
+            if (regionalUsers != null) {
+                for (User user : regionalUsers) {
+                    AccountShare share = new AccountShare(
+                        AccountId = acc.Id,
+                        UserOrGroupId = user.Id,
+                        AccountAccessLevel = 'Read',
+                        CaseAccessLevel = 'Read',
+                        OpportunityAccessLevel = 'Read',
+                        RowCause = 'Manual' // Or use custom RowCause
+                    );
+                    sharesToInsert.add(share);
+                }
+            }
+        }
+
+        if (!sharesToInsert.isEmpty()) {
+            Database.insert(sharesToInsert, false); // Allow partial success
+        }
+    }
+
+    private static Map<String, List<User>> getUsersByRegion() {
+        Map<String, List<User>> usersByRegion = new Map<String, List<User>>();
+
+        List<User> users = [
+            SELECT Id, Region__c
+            FROM User
+            WHERE IsActive = true
+            AND Region__c != null
+        ];
+
+        for (User user : users) {
+            if (!usersByRegion.containsKey(user.Region__c)) {
+                usersByRegion.put(user.Region__c, new List<User>());
+            }
+            usersByRegion.get(user.Region__c).add(user);
+        }
+
+        return usersByRegion;
+    }
+
+    private static String getRegionFromCountry(String country) {
+        Map<String, String> countryToRegion = new Map<String, String>{
+            'United States' => 'North America',
+            'Canada' => 'North America',
+            'United Kingdom' => 'Europe',
+            'Germany' => 'Europe',
+            'Japan' => 'Asia Pacific',
+            'Australia' => 'Asia Pacific'
+        };
+
+        return countryToRegion.get(country);
+    }
+}
+\`\`\`
+
+### 3. **Field-Level Security Management**
+
+\`\`\`apex
+public class FieldSecurityService {
+
+    public static void auditFieldLevelSecurity(String objectType) {
+        Map<String, Schema.SObjectField> fieldMap =
+            Schema.getGlobalDescribe().get(objectType).getDescribe().fields.getMap();
+
+        List<String> securityIssues = new List<String>();
+
+        for (String fieldName : fieldMap.keySet()) {
+            Schema.DescribeFieldResult fieldDescribe = fieldMap.get(fieldName).getDescribe();
+
+            // Check if sensitive fields are accessible
+            if (isSensitiveField(fieldName) && fieldDescribe.isAccessible()) {
+                securityIssues.add('Sensitive field ' + fieldName + ' is accessible');
+            }
+
+            // Check if PII fields have proper security
+            if (isPIIField(fieldName)) {
+                if (fieldDescribe.isAccessible() && !fieldDescribe.isEncrypted()) {
+                    securityIssues.add('PII field ' + fieldName + ' should be encrypted');
+                }
+            }
+        }
+
+        // Log security audit results
+        if (!securityIssues.isEmpty()) {
+            Security_Audit_Log__c auditLog = new Security_Audit_Log__c(
+                Object_Type__c = objectType,
+                Audit_Date__c = System.now(),
+                Issues_Found__c = String.join(securityIssues, '; '),
+                Issue_Count__c = securityIssues.size()
+            );
+            insert auditLog;
+        }
+    }
+
+    private static Boolean isSensitiveField(String fieldName) {
+        Set<String> sensitiveFields = new Set<String>{
+            'ssn__c', 'social_security_number__c', 'tax_id__c',
+            'salary__c', 'compensation__c', 'credit_score__c'
+        };
+
+        return sensitiveFields.contains(fieldName.toLowerCase());
+    }
+
+    private static Boolean isPIIField(String fieldName) {
+        Set<String> piiFields = new Set<String>{
+            'email', 'phone', 'personalemailaddress__c',
+            'birthdate', 'drivers_license__c'
+        };
+
+        return piiFields.contains(fieldName.toLowerCase());
+    }
+}
+\`\`\`
+
+## Secure Coding Practices 🔒
+
+### 1. **Input Validation and Sanitization**
+
+\`\`\`apex
+public class SecureInputValidator {
+
+    public static String sanitizeStringInput(String userInput, Integer maxLength) {
+        if (String.isBlank(userInput)) {
+            return '';
+        }
+
+        // Remove potentially dangerous characters
+        String sanitized = userInput.replaceAll('[<>"\\'&]', '');
+
+        // Trim to maximum length
+        if (sanitized.length() > maxLength) {
+            sanitized = sanitized.substring(0, maxLength);
+        }
+
+        // Escape remaining special characters
+        sanitized = String.escapeSingleQuotes(sanitized);
+
+        return sanitized;
+    }
+
+    public static Boolean validateEmail(String email) {
+        if (String.isBlank(email)) {
+            return false;
+        }
+
+        // Use regex pattern for email validation
+        Pattern emailPattern = Pattern.compile(
+            '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$'
+        );
+
+        return emailPattern.matcher(email).matches() && email.length() <= 255;
+    }
+
+    public static Boolean validatePhoneNumber(String phone) {
+        if (String.isBlank(phone)) {
+            return false;
+        }
+
+        // Remove all non-digit characters
+        String digitsOnly = phone.replaceAll('[^0-9]', '');
+
+        // Valid phone numbers should have 10-15 digits
+        return digitsOnly.length() >= 10 && digitsOnly.length() <= 15;
+    }
+
+    public static Decimal validateNumericInput(String input, Decimal minValue, Decimal maxValue) {
+        if (String.isBlank(input)) {
+            throw new IllegalArgumentException('Numeric input cannot be blank');
+        }
+
+        try {
+            Decimal value = Decimal.valueOf(input);
+
+            if (value < minValue || value > maxValue) {
+                throw new IllegalArgumentException(
+                    'Value must be between ' + minValue + ' and ' + maxValue
+                );
+            }
+
+            return value;
+        } catch (Exception e) {
+            throw new IllegalArgumentException('Invalid numeric format: ' + input);
+        }
+    }
+}
+\`\`\`
+
+### 2. **Secure External Integration**
+
+\`\`\`apex
+public class SecureIntegrationService {
+
+    public static String makeSecureCallout(String endpoint, String payload) {
+        // Validate endpoint URL
+        if (!isValidEndpoint(endpoint)) {
+            throw new SecurityException('Invalid endpoint URL');
+        }
+
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+
+        // Use Named Credential for security
+        request.setEndpoint('callout:Secure_API' + endpoint);
+        request.setMethod('POST');
+        request.setHeader('Content-Type', 'application/json');
+
+        // Add security headers
+        request.setHeader('X-Request-ID', generateRequestId());
+        request.setHeader('User-Agent', 'Salesforce-Integration/1.0');
+
+        // Encrypt sensitive payload
+        String encryptedPayload = encryptPayload(payload);
+        request.setBody(encryptedPayload);
+
+        // Set appropriate timeout
+        request.setTimeout(30000); // 30 seconds
+
+        try {
+            HttpResponse response = http.send(request);
+
+            // Validate response
+            if (response.getStatusCode() == 200) {
+                return decryptResponse(response.getBody());
+            } else {
+                logSecurityEvent('API_ERROR', 'Status: ' + response.getStatusCode());
+                throw new CalloutException('API call failed: ' + response.getStatus());
+            }
+
+        } catch (Exception e) {
+            logSecurityEvent('CALLOUT_EXCEPTION', e.getMessage());
+            throw e;
+        }
+    }
+
+    private static Boolean isValidEndpoint(String endpoint) {
+        // Whitelist allowed endpoints
+        Set<String> allowedEndpoints = new Set<String>{
+            '/api/v1/customers',
+            '/api/v1/orders',
+            '/api/v1/products'
+        };
+
+        return allowedEndpoints.contains(endpoint);
+    }
+
+    private static String generateRequestId() {
+        return String.valueOf(System.currentTimeMillis()) + '-' +
+               String.valueOf(Math.random()).substring(2, 8);
+    }
+
+    private static String encryptPayload(String payload) {
+        // Use Salesforce Crypto methods for encryption
+        Blob key = Crypto.generateAesKey(256);
+        Blob data = Blob.valueOf(payload);
+        Blob encryptedData = Crypto.encrypt('AES256', key, data);
+
+        // Store key securely (use Custom Settings or Protected Custom Metadata)
+        storeEncryptionKey(key);
+
+        return EncodingUtil.base64Encode(encryptedData);
+    }
+
+    private static String decryptResponse(String encryptedResponse) {
+        // Retrieve stored key
+        Blob key = getStoredEncryptionKey();
+        Blob encryptedData = EncodingUtil.base64Decode(encryptedResponse);
+        Blob decryptedData = Crypto.decrypt('AES256', key, encryptedData);
+
+        return decryptedData.toString();
+    }
+
+    private static void storeEncryptionKey(Blob key) {
+        // Implement secure key storage
+        // Use Custom Settings or Protected Custom Metadata
+    }
+
+    private static Blob getStoredEncryptionKey() {
+        // Implement secure key retrieval
+        return null; // Placeholder
+    }
+
+    private static void logSecurityEvent(String eventType, String details) {
+        Security_Event_Log__c log = new Security_Event_Log__c(
+            Event_Type__c = eventType,
+            Event_Details__c = details,
+            User_Id__c = UserInfo.getUserId(),
+            Event_Timestamp__c = System.now(),
+            IP_Address__c = Auth.getCurrentUserRemoteAddress()
+        );
+
+        insert log;
+    }
+}
+\`\`\`
+
+## Compliance and Data Protection 📋
+
+### 1. **GDPR Compliance Implementation**
+
+\`\`\`apex
+public class GDPRComplianceService {
+
+    public static void handleDataSubjectRequest(String requestType, String email) {
+        Contact dataSubject = findDataSubject(email);
+
+        if (dataSubject == null) {
+            logGDPRRequest(requestType, email, 'DATA_SUBJECT_NOT_FOUND');
+            return;
+        }
+
+        switch on requestType {
+            when 'ACCESS' {
+                generateDataExport(dataSubject);
+            }
+            when 'RECTIFICATION' {
+                initiateDataCorrection(dataSubject);
+            }
+            when 'ERASURE' {
+                performDataErasure(dataSubject);
+            }
+            when 'PORTABILITY' {
+                generatePortableDataExport(dataSubject);
+            }
+            when 'OBJECTION' {
+                processProcessingObjection(dataSubject);
+            }
+        }
+
+        logGDPRRequest(requestType, email, 'REQUEST_PROCESSED');
+    }
+
+    private static Contact findDataSubject(String email) {
+        List<Contact> contacts = [
+            SELECT Id, Email, FirstName, LastName, AccountId
+            FROM Contact
+            WHERE Email = :email
+            LIMIT 1
+        ];
+
+        return contacts.isEmpty() ? null : contacts[0];
+    }
+
+    private static void generateDataExport(Contact dataSubject) {
+        Map<String, Object> personalData = new Map<String, Object>();
+
+        // Collect personal data from multiple objects
+        personalData.put('Contact', getContactData(dataSubject.Id));
+        personalData.put('Cases', getCaseData(dataSubject.Id));
+        personalData.put('Opportunities', getOpportunityData(dataSubject.AccountId));
+        personalData.put('Activities', getActivityData(dataSubject.Id));
+
+        // Generate JSON export
+        String jsonExport = JSON.serializePretty(personalData);
+
+        // Create document or send email
+        createDataExportDocument(dataSubject, jsonExport);
+    }
+
+    private static void performDataErasure(Contact dataSubject) {
+        List<SObject> recordsToAnonymize = new List<SObject>();
+
+        // Anonymize rather than delete to maintain referential integrity
+        Contact anonymizedContact = dataSubject.clone(true, true, true, true);
+        anonymizedContact.FirstName = 'Anonymized';
+        anonymizedContact.LastName = 'User';
+        anonymizedContact.Email = 'anonymized@example.com';
+        anonymizedContact.Phone = null;
+        anonymizedContact.GDPR_Anonymized__c = true;
+        anonymizedContact.Anonymization_Date__c = System.now();
+
+        recordsToAnonymize.add(anonymizedContact);
+
+        // Anonymize related records
+        List<Case> relatedCases = [SELECT Id, SuppliedEmail, SuppliedName
+                                  FROM Case WHERE ContactId = :dataSubject.Id];
+
+        for (Case c : relatedCases) {
+            c.SuppliedEmail = 'anonymized@example.com';
+            c.SuppliedName = 'Anonymized User';
+            recordsToAnonymize.add(c);
+        }
+
+        // Update records
+        if (!recordsToAnonymize.isEmpty()) {
+            Database.update(recordsToAnonymize, false);
+        }
+    }
+
+    private static void logGDPRRequest(String requestType, String email, String status) {
+        GDPR_Request_Log__c log = new GDPR_Request_Log__c(
+            Request_Type__c = requestType,
+            Data_Subject_Email__c = email,
+            Request_Status__c = status,
+            Request_Date__c = System.now(),
+            Processed_By__c = UserInfo.getUserId()
+        );
+
+        insert log;
+    }
+
+    // Additional helper methods...
+    private static Map<String, Object> getContactData(Id contactId) {
+        // Implementation
+        return new Map<String, Object>();
+    }
+
+    private static List<Map<String, Object>> getCaseData(Id contactId) {
+        // Implementation
+        return new List<Map<String, Object>>();
+    }
+
+    private static List<Map<String, Object>> getOpportunityData(Id accountId) {
+        // Implementation
+        return new List<Map<String, Object>>();
+    }
+
+    private static List<Map<String, Object>> getActivityData(Id contactId) {
+        // Implementation
+        return new List<Map<String, Object>>();
+    }
+
+    private static void createDataExportDocument(Contact dataSubject, String jsonExport) {
+        // Implementation to create document or send email
+    }
+
+    private static void initiateDataCorrection(Contact dataSubject) {
+        // Implementation for data correction workflow
+    }
+
+    private static void generatePortableDataExport(Contact dataSubject) {
+        // Implementation for portable data export
+    }
+
+    private static void processProcessingObjection(Contact dataSubject) {
+        // Implementation for processing objection
+    }
+}
+\`\`\`
+
+### 2. **Audit Trail Implementation**
+
+\`\`\`apex
+public class AuditTrailService {
+
+    public static void logDataAccess(String objectType, Id recordId, String accessType) {
+        Data_Access_Log__c log = new Data_Access_Log__c(
+            Object_Type__c = objectType,
+            Record_Id__c = recordId,
+            Access_Type__c = accessType, // READ, WRITE, DELETE
+            User_Id__c = UserInfo.getUserId(),
+            Access_Timestamp__c = System.now(),
+            Session_Id__c = UserInfo.getSessionId(),
+            IP_Address__c = Auth.getCurrentUserRemoteAddress(),
+            User_Agent__c = System.Request.getCurrent()?.getHeader('User-Agent')
+        );
+
+        insert log;
+    }
+
+    public static void auditSensitiveDataAccess() {
+        // Get list of sensitive objects
+        Set<String> sensitiveObjects = new Set<String>{
+            'Contact', 'Lead', 'User', 'PersonAccount'
+        };
+
+        // Query recent access logs
+        DateTime last24Hours = System.now().addHours(-24);
+
+        List<Data_Access_Log__c> recentAccess = [
+            SELECT Object_Type__c, User_Id__c, COUNT(Id) AccessCount
+            FROM Data_Access_Log__c
+            WHERE Access_Timestamp__c >= :last24Hours
+            AND Object_Type__c IN :sensitiveObjects
+            GROUP BY Object_Type__c, User_Id__c
+            HAVING COUNT(Id) > 100 // Suspicious high volume access
+        ];
+
+        // Alert on suspicious activity
+        for (Data_Access_Log__c log : recentAccess) {
+            createSecurityAlert('HIGH_VOLUME_DATA_ACCESS',
+                'User accessed ' + log.Object_Type__c + ' ' +
+                'multiple times in 24 hours');
+        }
+    }
+
+    private static void createSecurityAlert(String alertType, String description) {
+        Security_Alert__c alert = new Security_Alert__c(
+            Alert_Type__c = alertType,
+            Description__c = description,
+            Alert_Timestamp__c = System.now(),
+            Status__c = 'Open',
+            Severity__c = 'High'
+        );
+
+        insert alert;
+
+        // Send notification to security team
+        notifySecurityTeam(alert);
+    }
+
+    private static void notifySecurityTeam(Security_Alert__c alert) {
+        // Implementation for security team notification
+        // Could use email, Chatter, or external system
+    }
+}
+\`\`\`
+
+## Security Testing & Validation 🧪
+
+### 1. **Security Test Framework**
+
+\`\`\`apex
+@isTest
+public class SecurityTestSuite {
+
+    @isTest
+    static void testFieldLevelSecurity() {
+        // Create test user with limited permissions
+        User limitedUser = createTestUser('Standard User');
+
+        System.runAs(limitedUser) {
+            // Test field accessibility
+            Account testAccount = new Account(Name = 'Test Account');
+            insert testAccount;
+
+            // Verify sensitive fields are not accessible
+            try {
+                testAccount.Sensitive_Data__c = 'Should not be accessible';
+                update testAccount;
+                System.assert(false, 'Should not be able to update sensitive field');
+            } catch (System.NoAccessException e) {
+                // Expected behavior
+                System.assert(true, 'Correctly blocked access to sensitive field');
+            }
+        }
+    }
+
+    @isTest
+    static void testRecordLevelSecurity() {
+        // Create test data with different owners
+        User owner1 = createTestUser('Standard User');
+        User owner2 = createTestUser('Standard User');
+
+        Account account1, account2;
+
+        System.runAs(owner1) {
+            account1 = new Account(Name = 'Owner 1 Account');
+            insert account1;
+        }
+
+        System.runAs(owner2) {
+            account2 = new Account(Name = 'Owner 2 Account');
+            insert account2;
+
+            // Try to access other user's record
+            List<Account> accessibleAccounts = [
+                SELECT Id, Name FROM Account WHERE Id = :account1.Id
+            ];
+
+            // Should not be accessible due to private OWD
+            System.assertEquals(0, accessibleAccounts.size(),
+                'Should not access other user\\'s private records');
+        }
+    }
+
+    @isTest
+    static void testInputValidation() {
+        // Test SQL injection prevention
+        String maliciousInput = '\\'; DROP TABLE Account; --';
+
+        try {
+            String sanitized = SecureInputValidator.sanitizeStringInput(maliciousInput, 255);
+            System.assert(!sanitized.contains('DROP'),
+                'Malicious SQL should be sanitized');
+        } catch (Exception e) {
+            System.assert(true, 'Input validation correctly rejected malicious input');
+        }
+    }
+
+    @isTest
+    static void testEncryptionSecurity() {
+        String sensitiveData = 'Social Security Number: 123-45-6789';
+
+        // Test encryption
+        Blob key = Crypto.generateAesKey(256);
+        Blob dataBlob = Blob.valueOf(sensitiveData);
+        Blob encryptedData = Crypto.encrypt('AES256', key, dataBlob);
+
+        // Verify data is encrypted
+        String encryptedString = EncodingUtil.base64Encode(encryptedData);
+        System.assert(!encryptedString.contains('123-45-6789'),
+            'Sensitive data should be encrypted');
+
+        // Test decryption
+        Blob decryptedData = Crypto.decrypt('AES256', key, encryptedData);
+        String decryptedString = decryptedData.toString();
+
+        System.assertEquals(sensitiveData, decryptedString,
+            'Decrypted data should match original');
+    }
+
+    private static User createTestUser(String profileName) {
+        Profile profile = [SELECT Id FROM Profile WHERE Name = :profileName LIMIT 1];
+
+        User testUser = new User(
+            FirstName = 'Test',
+            LastName = 'User',
+            Email = 'test@example.com',
+            Username = 'testuser' + System.currentTimeMillis() + '@example.com',
+            Alias = 'tuser',
+            TimeZoneSidKey = 'America/New_York',
+            LocaleSidKey = 'en_US',
+            EmailEncodingKey = 'UTF-8',
+            LanguageLocaleKey = 'en_US',
+            ProfileId = profile.Id
+        );
+
+        insert testUser;
+        return testUser;
+    }
+}
+\`\`\`
+
+## Next Steps 🎯
+
+Master these advanced security topics:
+- **Single Sign-On (SSO)** implementation
+- **Multi-Factor Authentication (MFA)** setup
+- **OAuth and JWT** for secure API access
+- **Platform Encryption** for data at rest
+- **Event Monitoring** for security analytics
+- **Security Health Check** automation
+
+**Remember**: Security is not a feature you add later - it's a foundation you build from day one. Great developers think like attackers to build better defenses! 🛡️
+
+Time to secure everything! 🔒`,
+              resources: [
+                {
+                  title: 'Salesforce Security Guide',
+                  type: 'documentation',
+                  url: 'https://developer.salesforce.com/docs/atlas.en-us.securityImplGuide.meta/securityImplGuide/',
+                  description: 'Comprehensive guide to Salesforce security'
+                },
+                {
+                  title: 'Data Protection and Privacy',
+                  type: 'trailhead',
+                  url: 'https://trailhead.salesforce.com/content/learn/trails/data-protection-and-privacy',
+                  description: 'Learn GDPR compliance and data protection'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'security-quiz',
+          title: 'Security & Best Practices Quiz',
+          questions: [
+            {
+              id: 'security-q1',
+              type: 'multiple-choice',
+              question: 'What is the most secure way to handle sensitive data in external API calls?',
+              options: [
+                'Include sensitive data in URL parameters',
+                'Use Named Credentials and encrypt the payload',
+                'Store credentials in static resources',
+                'Pass sensitive data in HTTP headers'
+              ],
+              correctAnswer: 'Use Named Credentials and encrypt the payload',
+              explanation: 'Named Credentials provide secure credential management, and encrypting the payload protects sensitive data in transit.',
+              points: 25,
+              difficulty: 'hard',
+              category: 'enterprise-security'
+            }
+          ],
+          passingScore: 90,
           attempts: 0,
           maxAttempts: 3
         }

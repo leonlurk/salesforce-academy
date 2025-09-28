@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { learningPaths } from '../data/learningPaths';
 import { useUser } from '../context/UserContext';
+import { useProgressStore } from '../store/progressStore';
 import ReactMarkdown from 'react-markdown';
 import InteractiveLesson from '../components/InteractiveLesson';
 import AnimatedQuiz from '../components/AnimatedQuiz';
@@ -25,8 +26,9 @@ const Lesson: React.FC = () => {
   const { pathId, moduleId, lessonId } = useParams();
   const navigate = useNavigate();
   const { user, updateUser } = useUser();
-  // const [currentStep] = useState(0);
+  const { completeLesson, isLessonCompleted, completeQuiz } = useProgressStore();
   const [showQuiz, setShowQuiz] = useState(false);
+  const [lessonStartTime] = useState(new Date());
 
   // Find the current lesson
   const path = learningPaths.find(p => p.id === pathId);
@@ -56,17 +58,24 @@ const Lesson: React.FC = () => {
   }
 
   const handleCompleteLesson = () => {
-    if (!user.completedLessons.includes(lesson.id)) {
-      updateUser({
-        completedLessons: [...user.completedLessons, lesson.id],
-        totalPoints: user.totalPoints + lesson.points,
-        experience: user.experience + lesson.points
-      });
+    if (!isCompleted && pathId && moduleId && lessonId) {
+      const timeSpent = Math.floor((new Date().getTime() - lessonStartTime.getTime()) / 1000);
+      completeLesson(pathId, moduleId, lessonId, lesson.points, timeSpent);
+
+      // Keep the old user system updated for compatibility
+      if (!user.completedLessons.includes(lesson.id)) {
+        updateUser({
+          completedLessons: [...user.completedLessons, lesson.id],
+          totalPoints: user.totalPoints + lesson.points,
+          experience: user.experience + lesson.points
+        });
+      }
     }
   };
 
-
-  const isCompleted = user.completedLessons.includes(lesson.id);
+  const isCompleted = pathId && moduleId && lessonId ?
+    isLessonCompleted(pathId, moduleId, lessonId) || user.completedLessons.includes(lesson.id) :
+    false;
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -255,8 +264,11 @@ const Lesson: React.FC = () => {
                     passingScore={80}
                     onComplete={(results) => {
                       console.log('Quiz completed:', results);
-                      if (results.passed) {
+                      if (results.passed && pathId && moduleId) {
+                        // Complete the quiz using the progress store
+                        completeQuiz(pathId, moduleId, `${lessonId}-quiz`, results.percentage);
                         handleCompleteLesson();
+
                         // Award additional points for quiz performance
                         const bonusPoints = results.percentage >= 90 ? 100 : results.percentage >= 80 ? 50 : 0;
                         updateUser({
@@ -360,13 +372,13 @@ const Lesson: React.FC = () => {
                   }`}
                 >
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                    user.completedLessons.includes(moduleLesson.id)
+                    (pathId && moduleId && isLessonCompleted(pathId, moduleId, moduleLesson.id)) || user.completedLessons.includes(moduleLesson.id)
                       ? 'bg-green-500 text-white'
                       : moduleLesson.id === lessonId
                       ? 'bg-primary-500 text-white'
                       : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400'
                   }`}>
-                    {user.completedLessons.includes(moduleLesson.id) ? '✓' : index + 1}
+                    {(pathId && moduleId && isLessonCompleted(pathId, moduleId, moduleLesson.id)) || user.completedLessons.includes(moduleLesson.id) ? '✓' : index + 1}
                   </div>
                   <span className="text-sm font-medium truncate">
                     {moduleLesson.title}
