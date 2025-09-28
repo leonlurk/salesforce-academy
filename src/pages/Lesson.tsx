@@ -38,6 +38,11 @@ const Lesson: React.FC = () => {
   const nextLesson = module?.lessons[currentLessonIndex + 1];
   const prevLesson = module?.lessons[currentLessonIndex - 1];
 
+  // Find next module if this is the last lesson in current module
+  const currentModuleIndex = path?.modules.findIndex(m => m.id === moduleId) || 0;
+  const nextModule = path?.modules[currentModuleIndex + 1];
+  const isLastLessonInModule = !nextLesson && module?.lessons.length === currentLessonIndex + 1;
+
   useEffect(() => {
     if (!lesson) {
       navigate('/dashboard');
@@ -302,6 +307,28 @@ const Lesson: React.FC = () => {
                 >
                   <span>Next Lesson</span>
                   <ChevronRight className="w-4 h-4" />
+                </Link>
+              )}
+
+              {/* Show "Next Module" button if this is the last lesson and module is completed */}
+              {isLastLessonInModule && isCompleted && nextModule && (
+                <Link
+                  to={`/path/${pathId}/module/${nextModule.id}/lesson/${nextModule.lessons[0]?.id}`}
+                  className="btn-primary flex items-center space-x-2"
+                >
+                  <span>Next Module: {nextModule.title}</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              )}
+
+              {/* Show "Back to Path" button if this is the last lesson of the last module */}
+              {isLastLessonInModule && isCompleted && !nextModule && (
+                <Link
+                  to={`/path/${pathId}`}
+                  className="btn-success flex items-center space-x-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Module Complete! Back to {path?.title}</span>
                 </Link>
               )}
             </div>
