@@ -3298,6 +3298,1534 @@ static void testCallout() {
           attempts: 0,
           maxAttempts: 3
         }
+      },
+      {
+        id: 'rest-apis-integration',
+        title: 'REST APIs & Integration Mastery',
+        description: 'Master external integrations, callouts, and building scalable API solutions',
+        duration: '3 weeks',
+        completed: false,
+        locked: true,
+        order: 4,
+        lessons: [
+          {
+            id: 'rest-api-fundamentals',
+            title: 'REST API Fundamentals: Connecting Salesforce to the World',
+            type: 'content',
+            duration: '45 min',
+            completed: false,
+            points: 400,
+            order: 1,
+            content: {
+              text: `# APIs: Your Gateway to Integration Excellence! 🌐
+
+Welcome to the world of integrations, future API architect!
+
+Ready to connect Salesforce with ANY external system? Today you'll learn how to make Salesforce talk to REST APIs, build your own API endpoints, and design integration patterns that scale to enterprise levels.
+
+## What Are REST APIs? 🤔
+
+**REST (Representational State Transfer)** is the most popular way systems communicate over the internet:
+
+- **Stateless**: Each request contains all information needed
+- **Resource-based**: URLs represent data objects
+- **HTTP methods**: GET (read), POST (create), PUT (update), DELETE (remove)
+- **JSON format**: Lightweight data exchange
+- **Standard HTTP codes**: 200 (success), 404 (not found), 500 (error)
+
+### REST vs SOAP 📊
+
+| Feature | REST | SOAP |
+|---------|------|------|
+| Format | JSON/XML | XML only |
+| Performance | Fast | Slower |
+| Learning Curve | Easy | Complex |
+| Standards | Flexible | Strict |
+| Popular with | Modern APIs | Enterprise/Legacy |
+
+## Salesforce API Landscape 🗺️
+
+Salesforce offers multiple API options:
+
+### 1. **REST API** - Most Popular
+- Standard HTTP methods
+- JSON responses
+- Perfect for web/mobile apps
+- Easy authentication with OAuth
+
+### 2. **SOAP API** - Enterprise Power
+- XML-based messaging
+- Strong typing and contracts
+- Better for .NET/Java integrations
+- More reliable error handling
+
+### 3. **Bulk API** - Big Data Processing
+- Handles millions of records
+- Asynchronous processing
+- CSV/JSON formats
+- Perfect for data migrations
+
+### 4. **Streaming API** - Real-time Updates
+- Push notifications
+- Event-driven architecture
+- Perfect for real-time dashboards
+- Uses PushTopic or Platform Events
+
+## Making HTTP Callouts from Apex 🚀
+
+### Basic HTTP GET Request
+
+\`\`\`apex
+public class WeatherService {
+    @future(callout=true)
+    public static void getWeatherData(String city) {
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+
+        // Configure the request
+        request.setEndpoint('https://api.weather.com/v1/current?key=' + getAPIKey() + '&q=' + city);
+        request.setMethod('GET');
+        request.setHeader('Content-Type', 'application/json');
+        request.setTimeout(12000); // 12 seconds
+
+        try {
+            HttpResponse response = http.send(request);
+
+            if (response.getStatusCode() == 200) {
+                String jsonResponse = response.getBody();
+                processWeatherData(jsonResponse, city);
+            } else {
+                System.debug('Error: ' + response.getStatusCode() + ' ' + response.getStatus());
+            }
+        } catch (Exception e) {
+            System.debug('Callout error: ' + e.getMessage());
+        }
+    }
+
+    private static void processWeatherData(String jsonData, String city) {
+        Map<String, Object> weatherMap = (Map<String, Object>) JSON.deserializeUntyped(jsonData);
+
+        // Extract temperature
+        Map<String, Object> current = (Map<String, Object>) weatherMap.get('current');
+        Decimal temperature = (Decimal) current.get('temp_c');
+
+        // Update custom object
+        Weather_Data__c weather = new Weather_Data__c(
+            City__c = city,
+            Temperature__c = temperature,
+            Last_Updated__c = System.now()
+        );
+        insert weather;
+    }
+
+    private static String getAPIKey() {
+        // Use Named Credentials or Custom Settings
+        return 'your-api-key-here';
+    }
+}
+\`\`\`
+
+### HTTP POST with JSON Payload
+
+\`\`\`apex
+public class CustomerSyncService {
+    public static void syncCustomerToERP(Account acc) {
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+
+        // Build JSON payload
+        Map<String, Object> customer = new Map<String, Object>{
+            'name' => acc.Name,
+            'email' => acc.Email__c,
+            'phone' => acc.Phone,
+            'salesforceId' => acc.Id
+        };
+
+        String jsonBody = JSON.serialize(customer);
+
+        request.setEndpoint('https://erp.company.com/api/customers');
+        request.setMethod('POST');
+        request.setHeader('Content-Type', 'application/json');
+        request.setHeader('Authorization', 'Bearer ' + getERPToken());
+        request.setBody(jsonBody);
+
+        HttpResponse response = http.send(request);
+
+        if (response.getStatusCode() == 201) {
+            // Parse response to get ERP customer ID
+            Map<String, Object> responseData =
+                (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+
+            acc.ERP_Customer_ID__c = (String) responseData.get('customerId');
+            update acc;
+        }
+    }
+}
+\`\`\`
+
+## Named Credentials: Security Best Practice 🔐
+
+Never hardcode endpoints or credentials! Use Named Credentials:
+
+### Setting Up Named Credentials
+1. **Setup** → **Named Credentials**
+2. **New Named Credential**
+3. Configure:
+   - **Label**: Weather API
+   - **Name**: Weather_API
+   - **URL**: https://api.weather.com
+   - **Identity Type**: Named Principal
+   - **Authentication Protocol**: OAuth 2.0 or API Key
+
+### Using Named Credentials in Code
+
+\`\`\`apex
+// Instead of hardcoded URL
+request.setEndpoint('https://api.weather.com/v1/current?q=' + city);
+
+// Use Named Credential
+request.setEndpoint('callout:Weather_API/v1/current?q=' + city);
+\`\`\`
+
+**Benefits**:
+- No hardcoded credentials in code
+- Easy environment management
+- Automatic authentication handling
+- Better security and governance
+
+## Building Custom REST Services 🛠️
+
+Create your own REST endpoints that external systems can call:
+
+\`\`\`apex
+@RestResource(urlMapping='/api/accounts/*')
+global with sharing class AccountRestService {
+
+    @HttpGet
+    global static List<Account> getAccounts() {
+        String accountId = RestContext.request.requestURI.substring(
+            RestContext.request.requestURI.lastIndexOf('/') + 1
+        );
+
+        if (String.isNotBlank(accountId)) {
+            return [SELECT Id, Name, Phone, BillingCity
+                   FROM Account
+                   WHERE Id = :accountId
+                   LIMIT 1];
+        } else {
+            return [SELECT Id, Name, Phone, BillingCity
+                   FROM Account
+                   LIMIT 100];
+        }
+    }
+
+    @HttpPost
+    global static String createAccount(String name, String phone, String email) {
+        try {
+            Account acc = new Account(
+                Name = name,
+                Phone = phone,
+                Email__c = email
+            );
+            insert acc;
+
+            return JSON.serialize(new Map<String, Object>{
+                'success' => true,
+                'accountId' => acc.Id,
+                'message' => 'Account created successfully'
+            });
+        } catch (Exception e) {
+            return JSON.serialize(new Map<String, Object>{
+                'success' => false,
+                'error' => e.getMessage()
+            });
+        }
+    }
+
+    @HttpPut
+    global static String updateAccount() {
+        // Implementation for updating accounts
+        String requestBody = RestContext.request.requestBody.toString();
+        // Parse JSON and update account
+        return 'Account updated';
+    }
+
+    @HttpDelete
+    global static String deleteAccount() {
+        // Implementation for deleting accounts
+        return 'Account deleted';
+    }
+}
+\`\`\`
+
+## Integration Patterns 🏗️
+
+### 1. **Request-Reply Pattern** (Synchronous)
+- Real-time data exchange
+- Immediate response required
+- Good for: Address validation, payment processing
+- Use: HTTP callouts
+
+### 2. **Fire-and-Forget Pattern** (Asynchronous)
+- No immediate response needed
+- Better performance
+- Good for: Logging, notifications
+- Use: Platform Events, Queueable jobs
+
+### 3. **Batch Integration Pattern**
+- Process large data sets
+- Scheduled intervals
+- Good for: Data synchronization
+- Use: Batch Apex, Bulk API
+
+### 4. **Event-Driven Pattern**
+- React to business events
+- Loosely coupled systems
+- Good for: Real-time updates
+- Use: Platform Events, Change Data Capture
+
+## Error Handling Best Practices ⚠️
+
+\`\`\`apex
+public class RobustIntegrationService {
+    public static void syncDataWithRetry(String endpoint, String data) {
+        Integer maxRetries = 3;
+        Integer attempt = 1;
+
+        while (attempt <= maxRetries) {
+            try {
+                HttpResponse response = makeCallout(endpoint, data);
+
+                if (response.getStatusCode() == 200) {
+                    // Success - break out of retry loop
+                    break;
+                } else if (response.getStatusCode() >= 500) {
+                    // Server error - retry
+                    if (attempt < maxRetries) {
+                        System.debug('Server error, retrying... Attempt: ' + attempt);
+                        attempt++;
+                        continue;
+                    } else {
+                        // Max retries reached
+                        logError('Max retries reached. Status: ' + response.getStatus());
+                    }
+                } else {
+                    // Client error (4xx) - don't retry
+                    logError('Client error: ' + response.getStatus());
+                    break;
+                }
+            } catch (Exception e) {
+                if (attempt < maxRetries) {
+                    System.debug('Exception occurred, retrying... ' + e.getMessage());
+                    attempt++;
+                } else {
+                    logError('Final attempt failed: ' + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private static HttpResponse makeCallout(String endpoint, String data) {
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(endpoint);
+        request.setMethod('POST');
+        request.setBody(data);
+        request.setTimeout(30000);
+        return http.send(request);
+    }
+
+    private static void logError(String errorMessage) {
+        Integration_Log__c log = new Integration_Log__c(
+            Error_Message__c = errorMessage,
+            Timestamp__c = System.now(),
+            Status__c = 'Failed'
+        );
+        insert log;
+    }
+}
+\`\`\`
+
+## Performance and Limits 📊
+
+### Governor Limits for Callouts:
+- **Maximum callouts per transaction**: 100
+- **Maximum timeout**: 120 seconds
+- **Maximum response size**: 6 MB
+- **Concurrent callouts**: 20 per org
+
+### Performance Tips:
+1. **Use @future for long-running callouts**
+2. **Implement timeout handling**
+3. **Cache responses when appropriate**
+4. **Use bulk patterns for multiple records**
+5. **Consider asynchronous patterns**
+
+## Next Steps 🎯
+
+Coming up in our Integration journey:
+- **Authentication patterns** (OAuth, JWT, API Keys)
+- **Platform Events** for real-time integration
+- **Change Data Capture** for data synchronization
+- **MuleSoft integration** patterns
+- **Error recovery** and monitoring strategies
+
+**Remember**: Great integrations are invisible to end users but provide seamless data flow between systems. You're building the digital nervous system of the business! 🧠
+
+Time to connect everything! 🚀`,
+              resources: [
+                {
+                  title: 'Salesforce REST API Developer Guide',
+                  type: 'documentation',
+                  url: 'https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/',
+                  description: 'Complete guide to Salesforce REST APIs'
+                },
+                {
+                  title: 'Named Credentials Setup',
+                  type: 'trailhead',
+                  url: 'https://trailhead.salesforce.com/content/learn/modules/apex_integration_services',
+                  description: 'Learn to set up secure external connections'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'rest-apis-quiz',
+          title: 'REST APIs & Integration Quiz',
+          questions: [
+            {
+              id: 'api-q1',
+              type: 'multiple-choice',
+              question: 'What is the main advantage of using Named Credentials for external callouts?',
+              options: [
+                'Faster response times',
+                'Better error handling',
+                'Secure credential management',
+                'Unlimited callouts'
+              ],
+              correctAnswer: 'Secure credential management',
+              explanation: 'Named Credentials securely store authentication details and endpoints, eliminating hardcoded credentials in code.',
+              points: 20,
+              difficulty: 'medium',
+              category: 'integration-security'
+            }
+          ],
+          passingScore: 80,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'visualforce-classic-dev',
+        title: 'Visualforce & Classic Development',
+        description: 'Master legacy UI development and custom page creation with Visualforce',
+        duration: '3 weeks',
+        completed: false,
+        locked: true,
+        order: 5,
+        lessons: [
+          {
+            id: 'visualforce-fundamentals',
+            title: 'Visualforce Fundamentals: Building Custom UI Before Lightning',
+            type: 'content',
+            duration: '40 min',
+            completed: false,
+            points: 350,
+            order: 1,
+            content: {
+              text: `# Visualforce: The Original Custom UI Platform! 🎨
+
+Welcome to the world of Visualforce development!
+
+While Lightning Web Components are the future, Visualforce still powers millions of custom pages across thousands of Salesforce orgs. As a developer, you need to understand both - many companies still rely heavily on Visualforce for complex custom interfaces.
+
+## What is Visualforce? 🤔
+
+**Visualforce** is Salesforce's original framework for building custom user interfaces:
+
+- **Server-side rendering**: Pages are built on Salesforce servers
+- **MVC Architecture**: Model (sObjects), View (Pages), Controller (Apex)
+- **Tag-based markup**: Similar to HTML but with Salesforce-specific tags
+- **Apex integration**: Direct binding to Apex controllers
+- **Classic UI**: Inherits Salesforce Classic styling by default
+
+### Visualforce vs Lightning Comparison 📊
+
+| Feature | Visualforce | Lightning Web Components |
+|---------|-------------|--------------------------|
+| Performance | Server-side (slower) | Client-side (faster) |
+| Learning Curve | Moderate | Steeper initially |
+| Flexibility | High | Very High |
+| Mobile Support | Limited | Excellent |
+| Modern UI | Manual styling | Built-in Lightning Design |
+| Development Model | Server-side MVC | Client-side Components |
+
+## Basic Visualforce Page Structure 🏗️
+
+### Simple Visualforce Page
+
+\`\`\`html
+<apex:page standardController="Account">
+    <apex:sectionHeader title="Account Details" subtitle="{!Account.Name}"/>
+
+    <apex:pageBlock title="Account Information">
+        <apex:pageBlockSection>
+            <apex:outputField value="{!Account.Name}"/>
+            <apex:outputField value="{!Account.Phone}"/>
+            <apex:outputField value="{!Account.Industry}"/>
+            <apex:outputField value="{!Account.BillingCity}"/>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:page>
+\`\`\`
+
+### Key Components Explained:
+
+**\`<apex:page>\`** - Root element that defines the page
+- **standardController**: Uses built-in CRUD operations
+- **customController**: Uses your own Apex controller
+- **extensions**: Adds custom methods to standard controller
+
+**\`<apex:sectionHeader>\`** - Classic Salesforce page header
+**\`<apex:pageBlock>\`** - Content container with styling
+**\`<apex:outputField>\`** - Displays field values with proper formatting
+
+## Custom Controllers: The Brain 🧠
+
+### Standard Controller (Built-in CRUD)
+
+\`\`\`html
+<apex:page standardController="Contact">
+    <apex:form>
+        <apex:pageBlock title="Edit Contact">
+            <apex:pageBlockButtons>
+                <apex:commandButton value="Save" action="{!save}"/>
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+
+            <apex:pageBlockSection>
+                <apex:inputField value="{!Contact.FirstName}"/>
+                <apex:inputField value="{!Contact.LastName}"/>
+                <apex:inputField value="{!Contact.Email}"/>
+                <apex:inputField value="{!Contact.Phone}"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
+\`\`\`
+
+### Custom Controller (Your Own Logic)
+
+\`\`\`apex
+public class AccountDashboardController {
+    public Account account { get; set; }
+    public List<Contact> contacts { get; set; }
+    public List<Opportunity> opportunities { get; set; }
+
+    public AccountDashboardController() {
+        String accountId = ApexPages.currentPage().getParameters().get('id');
+        loadAccountData(accountId);
+    }
+
+    private void loadAccountData(String accountId) {
+        account = [SELECT Id, Name, Phone, Industry, AnnualRevenue
+                  FROM Account
+                  WHERE Id = :accountId];
+
+        contacts = [SELECT Id, Name, Email, Phone
+                   FROM Contact
+                   WHERE AccountId = :accountId
+                   ORDER BY LastName];
+
+        opportunities = [SELECT Id, Name, StageName, Amount, CloseDate
+                        FROM Opportunity
+                        WHERE AccountId = :accountId
+                        ORDER BY CloseDate];
+    }
+
+    public PageReference refreshData() {
+        loadAccountData(account.Id);
+        return null; // Stay on current page
+    }
+
+    public PageReference createOpportunity() {
+        PageReference oppPage = new PageReference('/006/e');
+        oppPage.getParameters().put('accid', account.Id);
+        oppPage.setRedirect(true);
+        return oppPage;
+    }
+}
+\`\`\`
+
+### Using the Custom Controller
+
+\`\`\`html
+<apex:page controller="AccountDashboardController">
+    <apex:sectionHeader title="Account Dashboard" subtitle="{!account.Name}"/>
+
+    <apex:pageBlock title="Account Overview">
+        <apex:pageBlockButtons>
+            <apex:commandButton value="Refresh" action="{!refreshData}"/>
+            <apex:commandButton value="New Opportunity" action="{!createOpportunity}"/>
+        </apex:pageBlockButtons>
+
+        <apex:pageBlockSection title="Basic Information">
+            <apex:outputText label="Account Name" value="{!account.Name}"/>
+            <apex:outputText label="Industry" value="{!account.Industry}"/>
+            <apex:outputText label="Annual Revenue" value="{!account.AnnualRevenue}">
+                <apex:param value="{!account.AnnualRevenue}"/>
+            </apex:outputText>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+
+    <apex:pageBlock title="Related Contacts">
+        <apex:dataTable value="{!contacts}" var="contact" styleClass="list">
+            <apex:column headerValue="Name">
+                <apex:outputLink value="/{!contact.Id}">
+                    {!contact.Name}
+                </apex:outputLink>
+            </apex:column>
+            <apex:column headerValue="Email" value="{!contact.Email}"/>
+            <apex:column headerValue="Phone" value="{!contact.Phone}"/>
+        </apex:dataTable>
+    </apex:pageBlock>
+</apex:page>
+\`\`\`
+
+## JavaScript and AJAX in Visualforce ⚡
+
+### Action Functions for AJAX
+
+\`\`\`html
+<apex:page controller="ContactSearchController">
+    <script>
+        function searchContacts() {
+            var searchTerm = document.getElementById('{!$Component.searchInput}').value;
+            if (searchTerm.length >= 2) {
+                performSearch(searchTerm);
+            }
+        }
+    </script>
+
+    <apex:form>
+        <apex:actionFunction name="performSearch"
+                           action="{!searchContacts}"
+                           reRender="resultsPanel">
+            <apex:param name="searchTerm" value=""/>
+        </apex:actionFunction>
+
+        <apex:inputText id="searchInput"
+                       onkeyup="searchContacts()"
+                       placeholder="Type to search contacts..."/>
+
+        <apex:outputPanel id="resultsPanel">
+            <apex:dataTable value="{!searchResults}" var="contact">
+                <apex:column headerValue="Name" value="{!contact.Name}"/>
+                <apex:column headerValue="Email" value="{!contact.Email}"/>
+            </apex:dataTable>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>
+\`\`\`
+
+### The Controller for AJAX Search
+
+\`\`\`apex
+public class ContactSearchController {
+    public List<Contact> searchResults { get; set; }
+
+    public ContactSearchController() {
+        searchResults = new List<Contact>();
+    }
+
+    public void searchContacts() {
+        String searchTerm = ApexPages.currentPage().getParameters().get('searchTerm');
+
+        if (String.isNotBlank(searchTerm) && searchTerm.length() >= 2) {
+            String likePattern = '%' + String.escapeSingleQuotes(searchTerm) + '%';
+
+            searchResults = [SELECT Id, Name, Email, Phone
+                           FROM Contact
+                           WHERE Name LIKE :likePattern
+                           ORDER BY Name
+                           LIMIT 20];
+        } else {
+            searchResults.clear();
+        }
+    }
+}
+\`\`\`
+
+## Advanced Visualforce Features 🚀
+
+### Dynamic Components
+
+\`\`\`apex
+public class DynamicFormController {
+    public List<FieldWrapper> formFields { get; set; }
+
+    public class FieldWrapper {
+        public String fieldName { get; set; }
+        public String fieldLabel { get; set; }
+        public String fieldType { get; set; }
+        public Object fieldValue { get; set; }
+        public Boolean isRequired { get; set; }
+    }
+
+    public DynamicFormController() {
+        buildFormFields();
+    }
+
+    private void buildFormFields() {
+        formFields = new List<FieldWrapper>();
+
+        Map<String, Schema.SObjectField> fieldMap =
+            Schema.SObjectType.Account.fields.getMap();
+
+        for (String fieldName : fieldMap.keySet()) {
+            Schema.DescribeFieldResult fieldDesc =
+                fieldMap.get(fieldName).getDescribe();
+
+            if (fieldDesc.isUpdateable()) {
+                FieldWrapper wrapper = new FieldWrapper();
+                wrapper.fieldName = fieldName;
+                wrapper.fieldLabel = fieldDesc.getLabel();
+                wrapper.fieldType = String.valueOf(fieldDesc.getType());
+                wrapper.isRequired = !fieldDesc.isNillable();
+                formFields.add(wrapper);
+            }
+        }
+    }
+}
+\`\`\`
+
+### File Upload Component
+
+\`\`\`html
+<apex:page controller="FileUploadController">
+    <apex:form enctype="multipart/form-data">
+        <apex:pageBlock title="File Upload">
+            <apex:pageBlockSection>
+                <apex:inputFile value="{!fileBody}"
+                               filename="{!fileName}"
+                               id="fileUpload"/>
+                <apex:commandButton value="Upload" action="{!uploadFile}"/>
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection title="Uploaded Files">
+                <apex:dataTable value="{!attachments}" var="att">
+                    <apex:column headerValue="File Name" value="{!att.Name}"/>
+                    <apex:column headerValue="Size" value="{!att.BodyLength}"/>
+                    <apex:column headerValue="Download">
+                        <apex:outputLink value="/servlet/servlet.FileDownload?file={!att.Id}">
+                            Download
+                        </apex:outputLink>
+                    </apex:column>
+                </apex:dataTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
+\`\`\`
+
+## Error Handling and Validation 🛡️
+
+### Form Validation
+
+\`\`\`apex
+public class ContactFormController {
+    public Contact contact { get; set; }
+    public Boolean hasErrors { get; set; }
+
+    public ContactFormController() {
+        contact = new Contact();
+        hasErrors = false;
+    }
+
+    public PageReference saveContact() {
+        hasErrors = false;
+
+        // Custom validation
+        if (String.isBlank(contact.FirstName)) {
+            ApexPages.addMessage(new ApexPages.Message(
+                ApexPages.Severity.ERROR,
+                'First Name is required.'
+            ));
+            hasErrors = true;
+        }
+
+        if (String.isBlank(contact.Email) || !isValidEmail(contact.Email)) {
+            ApexPages.addMessage(new ApexPages.Message(
+                ApexPages.Severity.ERROR,
+                'A valid Email address is required.'
+            ));
+            hasErrors = true;
+        }
+
+        if (hasErrors) {
+            return null; // Stay on current page
+        }
+
+        try {
+            insert contact;
+            ApexPages.addMessage(new ApexPages.Message(
+                ApexPages.Severity.CONFIRM,
+                'Contact saved successfully!'
+            ));
+            contact = new Contact(); // Reset form
+        } catch (DmlException e) {
+            ApexPages.addMessage(new ApexPages.Message(
+                ApexPages.Severity.ERROR,
+                'Error saving contact: ' + e.getMessage()
+            ));
+        }
+
+        return null;
+    }
+
+    private Boolean isValidEmail(String email) {
+        Pattern emailPattern = Pattern.compile('^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$');
+        return emailPattern.matcher(email).matches();
+    }
+}
+\`\`\`
+
+## Mobile and Responsive Design 📱
+
+### Making Visualforce Mobile-Friendly
+
+\`\`\`html
+<apex:page showHeader="false"
+           sidebar="false"
+           standardStylesheets="false"
+           docType="html-5.0">
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <style>
+            .mobile-container {
+                max-width: 100%;
+                margin: 0 auto;
+                padding: 10px;
+            }
+
+            .responsive-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            @media (max-width: 768px) {
+                .responsive-table td {
+                    display: block;
+                    width: 100%;
+                    text-align: left;
+                }
+
+                .responsive-table th {
+                    display: none;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="mobile-container">
+            <!-- Your mobile-optimized content -->
+        </div>
+    </body>
+</apex:page>
+\`\`\`
+
+## Performance Best Practices ⚡
+
+### Optimize View State
+- Use **transient** keyword for temporary variables
+- Minimize controller state
+- Use **@ReadOnly** for display-only pages
+
+\`\`\`apex
+public class OptimizedController {
+    public transient List<Contact> searchResults { get; set; }
+    public String searchTerm { get; set; }
+
+    // This won't be included in view state
+    private transient Map<Id, Account> accountMap;
+}
+\`\`\`
+
+### Pagination for Large Data Sets
+
+\`\`\`apex
+public class PaginatedController {
+    public ApexPages.StandardSetController standardController { get; set; }
+
+    public PaginatedController() {
+        standardController = new ApexPages.StandardSetController(
+            [SELECT Id, Name, Email FROM Contact ORDER BY Name]
+        );
+        standardController.setPageSize(25);
+    }
+
+    public List<Contact> getContacts() {
+        return (List<Contact>) standardController.getRecords();
+    }
+
+    public Boolean getHasPrevious() {
+        return standardController.getHasPrevious();
+    }
+
+    public Boolean getHasNext() {
+        return standardController.getHasNext();
+    }
+
+    public PageReference previous() {
+        standardController.previous();
+        return null;
+    }
+
+    public PageReference next() {
+        standardController.next();
+        return null;
+    }
+}
+\`\`\`
+
+## When to Use Visualforce Today 🤔
+
+### Still Valuable For:
+- **Legacy system maintenance**
+- **Complex PDF generation** (with renderAs="PDF")
+- **Email templates** with dynamic content
+- **Integration with external JavaScript libraries**
+- **Highly customized interfaces** that don't fit Lightning
+- **Orgs not yet migrated to Lightning**
+
+### Consider Lightning For:
+- **New development projects**
+- **Mobile-first applications**
+- **Better performance requirements**
+- **Modern UI/UX standards**
+- **Component reusability**
+
+## Migration Strategy 🔄
+
+When migrating from Visualforce to Lightning:
+
+1. **Assess complexity** of existing pages
+2. **Identify reusable components**
+3. **Plan data layer migration**
+4. **Design new user experience**
+5. **Implement progressive migration**
+6. **Train users on new interface**
+
+**Remember**: Master both platforms! Many enterprises have hybrid environments where you'll work with Visualforce legacy systems while building new Lightning components. 💪
+
+Time to build some custom interfaces! 🎨`,
+              resources: [
+                {
+                  title: 'Visualforce Developer Guide',
+                  type: 'documentation',
+                  url: 'https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/',
+                  description: 'Complete Visualforce development guide'
+                },
+                {
+                  title: 'Visualforce to Lightning Migration',
+                  type: 'trailhead',
+                  url: 'https://trailhead.salesforce.com/content/learn/trails/lex_migrate_vf',
+                  description: 'Learn to migrate Visualforce to Lightning'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'visualforce-quiz',
+          title: 'Visualforce Development Quiz',
+          questions: [
+            {
+              id: 'vf-q1',
+              type: 'multiple-choice',
+              question: 'Which attribute makes a variable NOT included in the view state?',
+              options: [
+                'private',
+                'transient',
+                'static',
+                'readonly'
+              ],
+              correctAnswer: 'transient',
+              explanation: 'The transient keyword excludes variables from view state, improving page performance.',
+              points: 20,
+              difficulty: 'medium',
+              category: 'visualforce-performance'
+            }
+          ],
+          passingScore: 75,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'devops-deployment',
+        title: 'DevOps & Deployment Mastery',
+        description: 'Master CI/CD, version control, and enterprise deployment strategies',
+        duration: '4 weeks',
+        completed: false,
+        locked: true,
+        order: 6,
+        lessons: [
+          {
+            id: 'salesforce-devops-fundamentals',
+            title: 'Salesforce DevOps: Building Reliable Deployment Pipelines',
+            type: 'content',
+            duration: '50 min',
+            completed: false,
+            points: 450,
+            order: 1,
+            content: {
+              text: `# DevOps for Salesforce: Release with Confidence! 🚀
+
+Welcome to the world of Salesforce DevOps, future deployment master!
+
+Ready to move from "hope and pray" deployments to automated, reliable releases? Today you'll learn how to build bulletproof CI/CD pipelines that make deployments boring (in the best way possible).
+
+## What is Salesforce DevOps? 🔄
+
+**DevOps** brings development and operations together to deliver software faster and more reliably:
+
+- **Continuous Integration (CI)**: Automatically test every code change
+- **Continuous Deployment (CD)**: Automatically deploy tested changes
+- **Version Control**: Track every change with Git
+- **Environment Management**: Consistent sandbox strategies
+- **Monitoring**: Know when things break before users do
+- **Collaboration**: Developers and admins working together
+
+### Traditional vs DevOps Deployment 📊
+
+| Traditional | DevOps |
+|-------------|---------|
+| Manual deployments | Automated pipelines |
+| Weekend deployment windows | Deploy anytime |
+| "Works on my machine" | Consistent environments |
+| Manual testing | Automated test suites |
+| Fear of deployment | Confidence in releases |
+| Rollback is painful | Quick, automated rollbacks |
+
+## Salesforce Development Lifecycle 🔄
+
+### 1. **Source-Driven Development**
+Everything starts in version control, not in an org:
+
+\`\`\`bash
+# Initialize Salesforce DX project
+sfdx force:project:create --projectname my-salesforce-app
+
+# Authenticate to Dev Hub
+sfdx force:auth:web:login --setdefaultdevhubusername --setalias DevHub
+
+# Create scratch org
+sfdx force:org:create --targetdevhubusername DevHub --setdefaultusername --definitionfile config/project-scratch-def.json --setalias MyScratchOrg --durationdays 30
+
+# Push source to scratch org
+sfdx force:source:push --targetusername MyScratchOrg
+
+# Pull changes from scratch org
+sfdx force:source:pull --targetusername MyScratchOrg
+\`\`\`
+
+### 2. **Git Branching Strategy**
+
+\`\`\`bash
+# Feature branch workflow
+git checkout -b feature/new-validation-rule
+# Make your changes
+git add .
+git commit -m "Add opportunity validation rule"
+git push origin feature/new-validation-rule
+
+# Create pull request for code review
+# After approval, merge to main branch
+git checkout main
+git merge feature/new-validation-rule
+git push origin main
+\`\`\`
+
+### 3. **Environment Strategy** 🏗️
+
+**Development Flow**:
+Scratch Orgs → Developer Sandbox → QA Sandbox → UAT Sandbox → Production
+
+\`\`\`yaml
+# project-scratch-def.json
+{
+  "orgName": "My Company Scratch Org",
+  "edition": "Developer",
+  "features": ["EnableSetPasswordInApi", "MultiCurrency"],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    },
+    "pathAssistantSettings": {
+      "pathAssistantEnabled": true
+    },
+    "mobileSettings": {
+      "enableS1EncryptedStoragePref2": false
+    }
+  }
+}
+\`\`\`
+
+## CI/CD Pipeline with GitHub Actions 🤖
+
+### Complete GitHub Actions Workflow
+
+\`\`\`yaml
+# .github/workflows/ci-cd.yml
+name: Salesforce CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Salesforce CLI
+      run: |
+        wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
+        mkdir ~/sfdx
+        tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
+        echo "$HOME/sfdx/bin" >> $GITHUB_PATH
+        ~/sfdx/bin/sfdx version
+
+    - name: Authenticate to Dev Hub
+      run: |
+        echo "${{ secrets.DEVHUB_SFDX_URL }}" > ./DEVHUB_SFDX_URL.txt
+        sfdx force:auth:sfdxurl:store --sfdxurlfile ./DEVHUB_SFDX_URL.txt --setdefaultdevhubusername --setalias devhub
+
+    - name: Create scratch org
+      run: |
+        sfdx force:org:create --targetdevhubusername devhub --setdefaultusername --definitionfile config/project-scratch-def.json --setalias ciorg --wait 10 --durationdays 1
+
+    - name: Push source to scratch org
+      run: sfdx force:source:push --targetusername ciorg
+
+    - name: Run Apex tests
+      run: |
+        sfdx force:apex:test:run --targetusername ciorg --wait 10 --resultformat junit --codecoverage --testlevel RunLocalTests --outputdir test-results
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: test-results/
+
+    - name: Delete scratch org
+      if: always()
+      run: sfdx force:org:delete --targetusername ciorg --noprompt
+
+  deploy-to-sandbox:
+    needs: validate-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Salesforce CLI
+      run: |
+        # Same as above
+
+    - name: Authenticate to sandbox
+      run: |
+        echo "${{ secrets.SANDBOX_SFDX_URL }}" > ./SANDBOX_SFDX_URL.txt
+        sfdx force:auth:sfdxurl:store --sfdxurlfile ./SANDBOX_SFDX_URL.txt --setdefaultusername --setalias sandbox
+
+    - name: Deploy to sandbox
+      run: |
+        sfdx force:source:deploy --targetusername sandbox --manifest manifest/package.xml --wait 10 --testlevel RunLocalTests
+
+  validate-production:
+    needs: deploy-to-sandbox
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Validate production deployment
+      run: |
+        echo "${{ secrets.PRODUCTION_SFDX_URL }}" > ./PRODUCTION_SFDX_URL.txt
+        sfdx force:auth:sfdxurl:store --sfdxurlfile ./PRODUCTION_SFDX_URL.txt --setdefaultusername --setalias production
+        sfdx force:source:deploy --targetusername production --manifest manifest/package.xml --wait 30 --testlevel RunLocalTests --checkonly
+\`\`\`
+
+## Package Development Strategy 📦
+
+### Unlocked Packages for Modular Development
+
+\`\`\`bash
+# Create package
+sfdx force:package:create --name "Core Business Logic" --packagetype Unlocked --path force-app --targetdevhubusername DevHub
+
+# Create package version
+sfdx force:package:version:create --package "Core Business Logic" --installationkeybypass --wait 10 --targetdevhubusername DevHub
+
+# Install package in target org
+sfdx force:package:install --package 04t... --targetusername sandbox --wait 10
+\`\`\`
+
+### Package Dependencies
+
+\`\`\`json
+{
+  "packageDirectories": [
+    {
+      "path": "force-app/main/default",
+      "package": "Core Business Logic",
+      "versionName": "ver 1.0",
+      "versionNumber": "1.0.0.NEXT",
+      "default": true,
+      "dependencies": [
+        {
+          "package": "Base Configuration",
+          "versionNumber": "1.0.0.LATEST"
+        }
+      ]
+    }
+  ],
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "57.0"
+}
+\`\`\`
+
+## Testing Strategy 🧪
+
+### Automated Test Pyramid
+
+\`\`\`apex
+// Unit Tests (Base of pyramid - fast, isolated)
+@isTest
+public class AccountServiceTest {
+    @isTest
+    static void testCreateAccount_ValidData_Success() {
+        // Arrange
+        Account testAccount = new Account(Name = 'Test Corp');
+
+        // Act
+        Test.startTest();
+        Id accountId = AccountService.createAccount(testAccount);
+        Test.stopTest();
+
+        // Assert
+        Account createdAccount = [SELECT Id, Name FROM Account WHERE Id = :accountId];
+        System.assertEquals('Test Corp', createdAccount.Name);
+    }
+
+    @isTest
+    static void testCreateAccount_InvalidData_ThrowsException() {
+        // Arrange
+        Account invalidAccount = new Account(); // Missing required Name
+
+        // Act & Assert
+        Test.startTest();
+        try {
+            AccountService.createAccount(invalidAccount);
+            System.assert(false, 'Expected exception was not thrown');
+        } catch (AccountService.AccountException e) {
+            System.assert(e.getMessage().contains('Name is required'));
+        }
+        Test.stopTest();
+    }
+}
+
+// Integration Tests (Middle of pyramid - test component interactions)
+@isTest
+public class OpportunityIntegrationTest {
+    @isTest
+    static void testOpportunityCreation_WithAccountAndContact_CreatesActivities() {
+        // Test multiple components working together
+        Account acc = TestDataFactory.createAccount();
+        Contact con = TestDataFactory.createContact(acc.Id);
+
+        Test.startTest();
+        Opportunity opp = OpportunityService.createOpportunity(acc.Id, con.Id, 'New Business');
+        Test.stopTest();
+
+        // Verify all related records were created correctly
+        List<Task> tasks = [SELECT Id FROM Task WHERE WhatId = :opp.Id];
+        System.assertEquals(2, tasks.size(), 'Should create welcome and follow-up tasks');
+    }
+}
+
+// End-to-End Tests (Top of pyramid - test complete user journeys)
+@isTest
+public class LeadConversionE2ETest {
+    @isTest
+    static void testLeadConversion_CompleteJourney_Success() {
+        // Test entire lead-to-opportunity conversion process
+        Lead testLead = TestDataFactory.createQualifiedLead();
+
+        Test.startTest();
+        Database.LeadConvert lc = new Database.LeadConvert();
+        lc.setLeadId(testLead.Id);
+        lc.setConvertedStatus('Closed - Converted');
+        Database.LeadConvertResult lcr = Database.convertLead(lc);
+        Test.stopTest();
+
+        // Verify complete conversion
+        System.assert(lcr.isSuccess());
+        Account convertedAccount = [SELECT Id, Name FROM Account WHERE Id = :lcr.getAccountId()];
+        Contact convertedContact = [SELECT Id, LastName FROM Contact WHERE Id = :lcr.getContactId()];
+        Opportunity convertedOpp = [SELECT Id, Name FROM Opportunity WHERE Id = :lcr.getOpportunityId()];
+
+        System.assertNotEquals(null, convertedAccount);
+        System.assertNotEquals(null, convertedContact);
+        System.assertNotEquals(null, convertedOpp);
+    }
+}
+\`\`\`
+
+## Environment Management 🏗️
+
+### Sandbox Refresh Strategy
+
+\`\`\`bash
+#!/bin/bash
+# sandbox-refresh.sh
+
+echo "Starting sandbox refresh process..."
+
+# 1. Backup current sandbox data
+sfdx force:data:tree:export --targetusername QA --plan data/sample-data-plan.json --outputdir data/backup
+
+# 2. Refresh sandbox (manual step in Salesforce Setup)
+echo "Please refresh the sandbox in Salesforce Setup, then press any key to continue..."
+read -n 1
+
+# 3. Wait for refresh to complete
+echo "Waiting for sandbox refresh to complete..."
+sleep 300  # Wait 5 minutes
+
+# 4. Re-authenticate to refreshed sandbox
+sfdx force:auth:web:login --setalias QA-refreshed
+
+# 5. Deploy latest code
+sfdx force:source:deploy --targetusername QA-refreshed --sourcepath force-app --wait 15
+
+# 6. Import test data
+sfdx force:data:tree:import --targetusername QA-refreshed --plan data/sample-data-plan.json
+
+echo "Sandbox refresh complete!"
+\`\`\`
+
+### Data Management
+
+\`\`\`json
+// data/sample-data-plan.json
+{
+  "sobjects": [
+    {
+      "sobject": "Account",
+      "saveRefs": true,
+      "resolveRefs": false,
+      "files": ["Account.json"]
+    },
+    {
+      "sobject": "Contact",
+      "saveRefs": true,
+      "resolveRefs": true,
+      "files": ["Contact.json"]
+    },
+    {
+      "sobject": "Opportunity",
+      "saveRefs": false,
+      "resolveRefs": true,
+      "files": ["Opportunity.json"]
+    }
+  ]
+}
+\`\`\`
+
+## Monitoring and Alerting 📊
+
+### Custom Monitoring Dashboard
+
+\`\`\`apex
+public class DeploymentMonitor {
+    @AuraEnabled
+    public static Map<String, Object> getDeploymentHealth() {
+        Map<String, Object> healthData = new Map<String, Object>();
+
+        // Check recent deployments
+        List<DeployRequest> recentDeployments = [
+            SELECT Id, Status, StartDate, CompletedDate
+            FROM DeployRequest
+            WHERE StartDate > :System.now().addDays(-7)
+            ORDER BY StartDate DESC
+        ];
+
+        healthData.put('recentDeployments', recentDeployments);
+
+        // Check test coverage
+        List<ApexCodeCoverage> coverage = [
+            SELECT ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered
+            FROM ApexCodeCoverage
+        ];
+
+        Decimal totalCoverage = calculateOverallCoverage(coverage);
+        healthData.put('testCoverage', totalCoverage);
+
+        // Check governor limit usage
+        healthData.put('governorLimits', Limits.getMap());
+
+        return healthData;
+    }
+
+    private static Decimal calculateOverallCoverage(List<ApexCodeCoverage> coverage) {
+        Integer totalLines = 0;
+        Integer coveredLines = 0;
+
+        for (ApexCodeCoverage acc : coverage) {
+            totalLines += acc.NumLinesCovered + acc.NumLinesUncovered;
+            coveredLines += acc.NumLinesCovered;
+        }
+
+        return totalLines > 0 ? (Decimal.valueOf(coveredLines) / Decimal.valueOf(totalLines)) * 100 : 0;
+    }
+}
+\`\`\`
+
+## Rollback Strategy 🔄
+
+### Automated Rollback Script
+
+\`\`\`bash
+#!/bin/bash
+# rollback.sh
+
+BACKUP_COMMIT=$1
+
+if [ -z "$BACKUP_COMMIT" ]; then
+    echo "Please provide the commit hash to rollback to"
+    echo "Usage: ./rollback.sh <commit-hash>"
+    exit 1
+fi
+
+echo "Rolling back to commit: $BACKUP_COMMIT"
+
+# 1. Create rollback branch
+git checkout -b rollback-$(date +%Y%m%d-%H%M%S)
+
+# 2. Reset to backup commit
+git reset --hard $BACKUP_COMMIT
+
+# 3. Validate against production (check-only)
+echo "Validating rollback deployment..."
+sfdx force:source:deploy --targetusername production --sourcepath force-app --checkonly --wait 30
+
+if [ $? -eq 0 ]; then
+    echo "Validation successful. Deploying rollback..."
+    sfdx force:source:deploy --targetusername production --sourcepath force-app --wait 30
+    echo "Rollback complete!"
+else
+    echo "Validation failed. Please check the errors and try again."
+    exit 1
+fi
+\`\`\`
+
+## Best Practices Summary 💡
+
+### 1. **Source Control**
+- ✅ Everything in Git
+- ✅ Feature branch workflow
+- ✅ Meaningful commit messages
+- ✅ Code reviews via pull requests
+
+### 2. **Testing**
+- ✅ Maintain 85%+ test coverage
+- ✅ Unit, integration, and E2E tests
+- ✅ Test data factories
+- ✅ Automated test execution
+
+### 3. **Deployment**
+- ✅ Validate before deploy
+- ✅ Automate repetitive tasks
+- ✅ Monitor deployment health
+- ✅ Have rollback plan ready
+
+### 4. **Environment Management**
+- ✅ Consistent sandbox strategy
+- ✅ Regular sandbox refreshes
+- ✅ Environment-specific configurations
+- ✅ Data migration scripts
+
+## Next Steps 🎯
+
+Master these DevOps practices:
+- **Advanced CI/CD patterns** with complex deployments
+- **Blue-green deployment** strategies
+- **Feature toggles** for safer releases
+- **Automated security scanning**
+- **Performance monitoring**
+- **Multi-org deployment** coordination
+
+**Remember**: Great DevOps isn't just about tools - it's about culture, collaboration, and continuous improvement. You're building the foundation for reliable, scalable Salesforce development! 🚀
+
+Time to automate everything! ⚙️`,
+              resources: [
+                {
+                  title: 'Salesforce DX Developer Guide',
+                  type: 'documentation',
+                  url: 'https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/',
+                  description: 'Complete guide to Salesforce DX and modern development'
+                },
+                {
+                  title: 'DevOps Center',
+                  type: 'trailhead',
+                  url: 'https://trailhead.salesforce.com/content/learn/trails/devops-center',
+                  description: 'Learn Salesforce native DevOps tools'
+                }
+              ]
+            }
+          }
+        ],
+        quiz: {
+          id: 'devops-quiz',
+          title: 'DevOps & Deployment Quiz',
+          questions: [
+            {
+              id: 'devops-q1',
+              type: 'multiple-choice',
+              question: 'What is the main benefit of using scratch orgs in development?',
+              options: [
+                'They are faster than sandboxes',
+                'They provide consistent, source-driven environments',
+                'They cost less than sandboxes',
+                'They have more storage space'
+              ],
+              correctAnswer: 'They provide consistent, source-driven environments',
+              explanation: 'Scratch orgs are created from source control, ensuring every developer works in a consistent environment based on the same configuration.',
+              points: 20,
+              difficulty: 'medium',
+              category: 'salesforce-dx'
+            }
+          ],
+          passingScore: 80,
+          attempts: 0,
+          maxAttempts: 3
+        }
       }
     ]
   },
