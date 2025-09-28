@@ -6601,6 +6601,3399 @@ The path to Technical Architect certification is challenging but incredibly rewa
           attempts: 0,
           maxAttempts: 3
         }
+      },
+      {
+        id: 'data-architecture',
+        title: 'Advanced Data Architecture & Modeling',
+        description: 'Design complex data models, relationships, and data governance strategies',
+        duration: '3 weeks',
+        completed: false,
+        locked: true,
+        order: 2,
+        lessons: [
+          {
+            id: 'enterprise-data-modeling',
+            title: 'Enterprise Data Modeling: Beyond Basic Relationships',
+            type: 'content',
+            duration: '45 min',
+            completed: false,
+            points: 400,
+            order: 1,
+            content: {
+              text: `# Enterprise Data Modeling Mastery 📊
+
+Welcome to the world of complex data architecture!
+
+## Advanced Relationship Patterns 🔗
+
+### 1. **Hierarchical Data Models**
+
+\`\`\`apex
+// Account Hierarchy with Territory Management
+public class AccountHierarchyService {
+
+    public static void buildAccountHierarchy() {
+        List<Account> parentAccounts = [
+            SELECT Id, Name, Parent.Name,
+                   (SELECT Id, Name FROM ChildAccounts)
+            FROM Account
+            WHERE Parent.Name = null
+            ORDER BY Name
+        ];
+
+        for (Account parent : parentAccounts) {
+            System.debug('Parent: ' + parent.Name);
+            analyzeHierarchyDepth(parent.Id, 0);
+        }
+    }
+
+    private static void analyzeHierarchyDepth(Id accountId, Integer currentDepth) {
+        if (currentDepth > 5) { // Prevent infinite recursion
+            return;
+        }
+
+        List<Account> children = [
+            SELECT Id, Name,
+                   (SELECT Id, Name FROM ChildAccounts)
+            FROM Account
+            WHERE ParentId = :accountId
+        ];
+
+        for (Account child : children) {
+            System.debug('Level ' + (currentDepth + 1) + ': ' + child.Name);
+            analyzeHierarchyDepth(child.Id, currentDepth + 1);
+        }
+    }
+}
+\`\`\`
+
+### 2. **Complex Junction Objects**
+
+\`\`\`apex
+// Advanced Many-to-Many with Metadata
+public class SkillMatrixController {
+
+    @AuraEnabled
+    public static List<SkillAssignmentWrapper> getEmployeeSkillMatrix(Id employeeId) {
+        List<SkillAssignmentWrapper> skillMatrix = new List<SkillAssignmentWrapper>();
+
+        List<Employee_Skill__c> assignments = [
+            SELECT Id, Employee__c, Skill__c,
+                   Proficiency_Level__c, Certification_Date__c,
+                   Last_Assessment_Date__c, Years_Experience__c,
+                   Skill__r.Name, Skill__r.Category__c, Skill__r.Required_Level__c
+            FROM Employee_Skill__c
+            WHERE Employee__c = :employeeId
+            ORDER BY Skill__r.Category__c, Skill__r.Name
+        ];
+
+        Map<String, List<Employee_Skill__c>> skillsByCategory =
+            new Map<String, List<Employee_Skill__c>>();
+
+        for (Employee_Skill__c assignment : assignments) {
+            String category = assignment.Skill__r.Category__c;
+            if (!skillsByCategory.containsKey(category)) {
+                skillsByCategory.put(category, new List<Employee_Skill__c>());
+            }
+            skillsByCategory.get(category).add(assignment);
+        }
+
+        for (String category : skillsByCategory.keySet()) {
+            SkillAssignmentWrapper wrapper = new SkillAssignmentWrapper();
+            wrapper.category = category;
+            wrapper.skills = skillsByCategory.get(category);
+            wrapper.averageProficiency = calculateAverageProficiency(wrapper.skills);
+            skillMatrix.add(wrapper);
+        }
+
+        return skillMatrix;
+    }
+
+    private static Decimal calculateAverageProficiency(List<Employee_Skill__c> skills) {
+        if (skills.isEmpty()) return 0;
+
+        Decimal total = 0;
+        for (Employee_Skill__c skill : skills) {
+            total += skill.Proficiency_Level__c != null ? skill.Proficiency_Level__c : 0;
+        }
+
+        return total / skills.size();
+    }
+
+    public class SkillAssignmentWrapper {
+        @AuraEnabled public String category { get; set; }
+        @AuraEnabled public List<Employee_Skill__c> skills { get; set; }
+        @AuraEnabled public Decimal averageProficiency { get; set; }
+    }
+}
+\`\`\`
+
+## Data Governance Patterns 🛡️
+
+### 1. **Master Data Management**
+
+\`\`\`apex
+public class MasterDataService {
+
+    public static void synchronizeMasterData() {
+        // Product Master Data Sync
+        synchronizeProducts();
+
+        // Customer Master Data Sync
+        synchronizeCustomers();
+
+        // Territory Master Data Sync
+        synchronizeTerritories();
+    }
+
+    private static void synchronizeProducts() {
+        List<Product_Master__c> masterProducts = [
+            SELECT Id, External_Id__c, Name, Category__c,
+                   Status__c, Last_Modified_External__c
+            FROM Product_Master__c
+            WHERE Status__c = 'Active'
+            AND Last_Modified_External__c > :System.now().addDays(-1)
+        ];
+
+        List<Product2> productsToUpdate = new List<Product2>();
+
+        for (Product_Master__c master : masterProducts) {
+            Product2 product = new Product2(
+                External_Id__c = master.External_Id__c,
+                Name = master.Name,
+                Family = master.Category__c,
+                IsActive = master.Status__c == 'Active'
+            );
+            productsToUpdate.add(product);
+        }
+
+        Database.UpsertResult[] results = Database.upsert(
+            productsToUpdate,
+            Product2.External_Id__c,
+            false
+        );
+
+        logSyncResults('Product', results);
+    }
+
+    private static void logSyncResults(String objectType, Database.UpsertResult[] results) {
+        Integer successCount = 0;
+        Integer errorCount = 0;
+        List<String> errors = new List<String>();
+
+        for (Database.UpsertResult result : results) {
+            if (result.isSuccess()) {
+                successCount++;
+            } else {
+                errorCount++;
+                for (Database.Error error : result.getErrors()) {
+                    errors.add(error.getMessage());
+                }
+            }
+        }
+
+        Data_Sync_Log__c syncLog = new Data_Sync_Log__c(
+            Object_Type__c = objectType,
+            Sync_Date__c = System.now(),
+            Success_Count__c = successCount,
+            Error_Count__c = errorCount,
+            Error_Details__c = String.join(errors, '; ')
+        );
+
+        insert syncLog;
+    }
+}
+\`\`\`
+
+### 2. **Data Quality Monitoring**
+
+\`\`\`apex
+public class DataQualityMonitor {
+
+    @future
+    public static void runDataQualityChecks() {
+        checkAccountDataQuality();
+        checkContactDataQuality();
+        checkOpportunityDataQuality();
+    }
+
+    private static void checkAccountDataQuality() {
+        List<Data_Quality_Issue__c> issues = new List<Data_Quality_Issue__c>();
+
+        // Check for accounts without phone numbers
+        List<Account> accountsWithoutPhone = [
+            SELECT Id, Name
+            FROM Account
+            WHERE Phone = null
+            AND Type = 'Customer'
+            LIMIT 1000
+        ];
+
+        for (Account acc : accountsWithoutPhone) {
+            issues.add(createQualityIssue(
+                acc.Id,
+                'Account',
+                'Missing Phone Number',
+                'Customer accounts should have phone numbers'
+            ));
+        }
+
+        // Check for duplicate accounts
+        Map<String, List<Account>> accountsByName = new Map<String, List<Account>>();
+        List<Account> allAccounts = [
+            SELECT Id, Name, Phone, Website
+            FROM Account
+            WHERE Name != null
+        ];
+
+        for (Account acc : allAccounts) {
+            String key = acc.Name.toLowerCase();
+            if (!accountsByName.containsKey(key)) {
+                accountsByName.put(key, new List<Account>());
+            }
+            accountsByName.get(key).add(acc);
+        }
+
+        for (String name : accountsByName.keySet()) {
+            List<Account> duplicates = accountsByName.get(name);
+            if (duplicates.size() > 1) {
+                for (Account duplicate : duplicates) {
+                    issues.add(createQualityIssue(
+                        duplicate.Id,
+                        'Account',
+                        'Potential Duplicate',
+                        'Multiple accounts with same name: ' + name
+                    ));
+                }
+            }
+        }
+
+        if (!issues.isEmpty()) {
+            insert issues;
+        }
+    }
+
+    private static Data_Quality_Issue__c createQualityIssue(
+        Id recordId,
+        String objectType,
+        String issueType,
+        String description
+    ) {
+        return new Data_Quality_Issue__c(
+            Record_Id__c = recordId,
+            Object_Type__c = objectType,
+            Issue_Type__c = issueType,
+            Description__c = description,
+            Identified_Date__c = System.now(),
+            Status__c = 'Open',
+            Priority__c = determinePriority(issueType)
+        );
+    }
+
+    private static String determinePriority(String issueType) {
+        Map<String, String> priorityMap = new Map<String, String>{
+            'Missing Phone Number' => 'Medium',
+            'Potential Duplicate' => 'High',
+            'Invalid Email' => 'High',
+            'Missing Required Field' => 'Critical'
+        };
+
+        return priorityMap.get(issueType) != null ? priorityMap.get(issueType) : 'Low';
+    }
+}
+\`\`\`
+
+## Archive & Retention Strategies 📦
+
+### 1. **Intelligent Data Archiving**
+
+\`\`\`apex
+public class DataArchivalService {
+
+    @future
+    public static void archiveOldRecords() {
+        archiveOldCases();
+        archiveOldOpportunities();
+        archiveOldTasks();
+    }
+
+    private static void archiveOldCases() {
+        Date archiveThreshold = System.today().addYears(-3);
+
+        List<Case> oldCases = [
+            SELECT Id, CaseNumber, Subject, Status,
+                   CreatedDate, ClosedDate, AccountId
+            FROM Case
+            WHERE Status = 'Closed'
+            AND ClosedDate < :archiveThreshold
+            AND Archived__c = false
+            LIMIT 2000
+        ];
+
+        List<Case_Archive__c> archiveRecords = new List<Case_Archive__c>();
+        List<Case> casesToUpdate = new List<Case>();
+
+        for (Case oldCase : oldCases) {
+            // Create archive record
+            Case_Archive__c archive = new Case_Archive__c(
+                Original_Case_Id__c = oldCase.Id,
+                Case_Number__c = oldCase.CaseNumber,
+                Subject__c = oldCase.Subject,
+                Status__c = oldCase.Status,
+                Created_Date__c = oldCase.CreatedDate,
+                Closed_Date__c = oldCase.ClosedDate,
+                Account_Id__c = oldCase.AccountId,
+                Archived_Date__c = System.now()
+            );
+            archiveRecords.add(archive);
+
+            // Mark original for archiving
+            oldCase.Archived__c = true;
+            oldCase.Archive_Date__c = System.now();
+            casesToUpdate.add(oldCase);
+        }
+
+        try {
+            insert archiveRecords;
+            update casesToUpdate;
+
+            System.debug('Archived ' + oldCases.size() + ' cases successfully');
+        } catch (Exception e) {
+            System.debug('Archive operation failed: ' + e.getMessage());
+        }
+    }
+}
+\`\`\`
+
+## Performance Optimization 🚀
+
+### 1. **Query Optimization Patterns**
+
+\`\`\`apex
+public class PerformantDataRetrieval {
+
+    // Bad: N+1 Query Pattern
+    public static void inefficientApproach() {
+        List<Account> accounts = [SELECT Id, Name FROM Account LIMIT 100];
+
+        for (Account acc : accounts) {
+            // This creates 100 separate queries!
+            List<Contact> contacts = [
+                SELECT Id, Name
+                FROM Contact
+                WHERE AccountId = :acc.Id
+            ];
+            System.debug(acc.Name + ' has ' + contacts.size() + ' contacts');
+        }
+    }
+
+    // Good: Optimized Query Pattern
+    public static void efficientApproach() {
+        // Single query with subquery
+        List<Account> accounts = [
+            SELECT Id, Name,
+                   (SELECT Id, Name FROM Contacts)
+            FROM Account
+            LIMIT 100
+        ];
+
+        for (Account acc : accounts) {
+            System.debug(acc.Name + ' has ' + acc.Contacts.size() + ' contacts');
+        }
+    }
+
+    // Advanced: Selective Query Pattern
+    public static Map<Id, Account> getAccountsWithRecentOpportunities(Set<Id> accountIds) {
+        Date recentThreshold = System.today().addMonths(-6);
+
+        Map<Id, Account> accountMap = new Map<Id, Account>([
+            SELECT Id, Name, Type, Industry,
+                   (SELECT Id, Name, StageName, Amount, CloseDate
+                    FROM Opportunities
+                    WHERE CreatedDate >= :recentThreshold
+                    AND StageName NOT IN ('Closed Won', 'Closed Lost')
+                    ORDER BY Amount DESC
+                    LIMIT 5)
+            FROM Account
+            WHERE Id IN :accountIds
+            AND Type = 'Customer'
+        ]);
+
+        return accountMap;
+    }
+}
+\`\`\`
+
+## Enterprise Integration Patterns 🔌
+
+### 1. **Event-Driven Architecture**
+
+\`\`\`apex
+public class CustomerEventPublisher {
+
+    public static void publishCustomerEvents(List<Account> accounts, String eventType) {
+        List<Customer_Event__e> events = new List<Customer_Event__e>();
+
+        for (Account acc : accounts) {
+            Customer_Event__e event = new Customer_Event__e(
+                Account_Id__c = acc.Id,
+                Event_Type__c = eventType,
+                Account_Name__c = acc.Name,
+                Industry__c = acc.Industry,
+                Annual_Revenue__c = acc.AnnualRevenue,
+                Event_Timestamp__c = System.now(),
+                Event_Source__c = 'Salesforce CRM'
+            );
+            events.add(event);
+        }
+
+        List<Database.SaveResult> results = EventBus.publish(events);
+
+        for (Database.SaveResult result : results) {
+            if (!result.isSuccess()) {
+                for (Database.Error error : result.getErrors()) {
+                    System.debug('Event publish error: ' + error.getMessage());
+                }
+            }
+        }
+    }
+}
+\`\`\`
+
+**Remember**: As a Technical Architect, you don't just store data—you design intelligent data ecosystems that power entire enterprises! 🏗️`
+            },
+            codeExample: {
+              title: 'Enterprise Data Model Implementation',
+              language: 'apex',
+              code: `// Complete Enterprise Data Architecture Example
+public class EnterpriseDataOrchestrator {
+
+    public static void orchestrateCustomerLifecycle(Id customerId) {
+        try {
+            // 1. Validate data integrity
+            DataQualityMonitor.validateCustomerData(customerId);
+
+            // 2. Update master data
+            MasterDataService.syncCustomerMasterData(customerId);
+
+            // 3. Trigger business processes
+            CustomerEventPublisher.publishCustomerEvents(
+                new List<Account>{getAccount(customerId)},
+                'Customer_Updated'
+            );
+
+            // 4. Update related hierarchies
+            AccountHierarchyService.updateHierarchyMetrics(customerId);
+
+            System.debug('Customer lifecycle orchestration completed');
+
+        } catch (Exception e) {
+            // Enterprise error handling
+            ErrorLogger.logError('CustomerLifecycle', e);
+            throw new CustomerLifecycleException('Failed to orchestrate customer lifecycle: ' + e.getMessage());
+        }
+    }
+
+    private static Account getAccount(Id accountId) {
+        return [
+            SELECT Id, Name, Type, Industry, AnnualRevenue,
+                   Parent.Name, Owner.Name
+            FROM Account
+            WHERE Id = :accountId
+        ];
+    }
+
+    public class CustomerLifecycleException extends Exception {}
+}`
+            }
+          },
+          {
+            id: 'data-governance-framework',
+            title: 'Data Governance Framework Design',
+            type: 'content',
+            duration: '40 min',
+            completed: false,
+            points: 350,
+            order: 2,
+            content: {
+              text: `# Data Governance Mastery 🛡️
+
+## Building Enterprise Data Governance
+
+### 1. **Data Classification System**
+
+\`\`\`apex
+public class DataClassificationService {
+
+    public static void classifyAccountData() {
+        List<Account> accounts = [
+            SELECT Id, Name, Type, Industry, AnnualRevenue,
+                   Phone, Website, BillingCountry
+            FROM Account
+        ];
+
+        List<Data_Classification__c> classifications = new List<Data_Classification__c>();
+
+        for (Account acc : accounts) {
+            Data_Classification__c classification = new Data_Classification__c(
+                Record_Id__c = acc.Id,
+                Object_Type__c = 'Account',
+                Data_Category__c = determineDataCategory(acc),
+                Security_Level__c = determineSecurityLevel(acc),
+                Retention_Period__c = determineRetentionPeriod(acc),
+                Geographic_Scope__c = acc.BillingCountry,
+                Business_Criticality__c = determineBusinessCriticality(acc)
+            );
+            classifications.add(classification);
+        }
+
+        insert classifications;
+    }
+
+    private static String determineDataCategory(Account acc) {
+        if (acc.Type == 'Customer' && acc.AnnualRevenue > 10000000) {
+            return 'Strategic Customer';
+        } else if (acc.Type == 'Partner') {
+            return 'Business Partner';
+        } else if (acc.Type == 'Prospect') {
+            return 'Potential Customer';
+        }
+        return 'General Business';
+    }
+
+    private static String determineSecurityLevel(Account acc) {
+        Set<String> highSecurityIndustries = new Set<String>{
+            'Banking', 'Healthcare', 'Government', 'Defense'
+        };
+
+        if (highSecurityIndustries.contains(acc.Industry)) {
+            return 'High';
+        } else if (acc.AnnualRevenue > 50000000) {
+            return 'Medium-High';
+        }
+        return 'Standard';
+    }
+}
+\`\`\`
+
+### 2. **Privacy & Compliance Framework**
+
+\`\`\`apex
+public class PrivacyComplianceService {
+
+    public static void processDataSubjectRights(Id contactId, String requestType) {
+        Contact dataSubject = [
+            SELECT Id, Name, Email, Phone, AccountId,
+                   Consent_Marketing__c, Consent_Analytics__c
+            FROM Contact
+            WHERE Id = :contactId
+        ];
+
+        switch on requestType {
+            when 'ACCESS' {
+                generateDataExport(dataSubject);
+            }
+            when 'DELETE' {
+                processRightToBeDeleted(dataSubject);
+            }
+            when 'RECTIFICATION' {
+                flagForDataCorrection(dataSubject);
+            }
+            when 'PORTABILITY' {
+                generatePortableDataExport(dataSubject);
+            }
+            when 'RESTRICTION' {
+                restrictDataProcessing(dataSubject);
+            }
+        }
+
+        // Log the privacy request
+        Privacy_Request_Log__c privacyLog = new Privacy_Request_Log__c(
+            Contact_Id__c = contactId,
+            Request_Type__c = requestType,
+            Request_Date__c = System.now(),
+            Status__c = 'Processing',
+            Legal_Basis__c = determineLegalBasis(requestType)
+        );
+        insert privacyLog;
+    }
+
+    private static void processRightToBeDeleted(Contact dataSubject) {
+        // Check if deletion is legally permissible
+        if (hasLegalObligationToRetain(dataSubject.Id)) {
+            throw new PrivacyException('Cannot delete - legal retention requirement');
+        }
+
+        // Anonymize instead of hard delete for audit trails
+        dataSubject.FirstName = 'DELETED';
+        dataSubject.LastName = 'USER';
+        dataSubject.Email = 'deleted@company.com';
+        dataSubject.Phone = null;
+        dataSubject.Data_Deleted__c = true;
+        dataSubject.Deletion_Date__c = System.now();
+
+        update dataSubject;
+
+        // Delete related non-essential records
+        deleteRelatedPersonalData(dataSubject.Id);
+    }
+
+    private static Boolean hasLegalObligationToRetain(Id contactId) {
+        // Check for active contracts, legal holds, etc.
+        Integer activeContracts = [
+            SELECT COUNT()
+            FROM Contract
+            WHERE CustomerSignedId = :contactId
+            AND Status = 'Activated'
+        ];
+
+        return activeContracts > 0;
+    }
+
+    public class PrivacyException extends Exception {}
+}
+\`\`\`
+
+### 3. **Data Lineage Tracking**
+
+\`\`\`apex
+public class DataLineageTracker {
+
+    public static void trackDataMovement(String sourceObject, String targetObject, List<Id> recordIds) {
+        List<Data_Lineage__c> lineageRecords = new List<Data_Lineage__c>();
+
+        for (Id recordId : recordIds) {
+            Data_Lineage__c lineage = new Data_Lineage__c(
+                Source_Object__c = sourceObject,
+                Target_Object__c = targetObject,
+                Source_Record_Id__c = recordId,
+                Movement_Type__c = 'Sync',
+                Movement_Date__c = System.now(),
+                Movement_Reason__c = 'Data Integration Process',
+                Data_Quality_Score__c = calculateDataQualityScore(recordId),
+                Transformation_Applied__c = 'Standard Mapping'
+            );
+            lineageRecords.add(lineage);
+        }
+
+        insert lineageRecords;
+    }
+
+    private static Decimal calculateDataQualityScore(Id recordId) {
+        // Implement data quality scoring logic
+        // Check completeness, accuracy, consistency
+        return 85.5; // Placeholder
+    }
+}
+\`\`\`
+
+## Data Security Architecture 🔒
+
+### 1. **Field-Level Encryption Strategy**
+
+\`\`\`apex
+public class EncryptionService {
+
+    public static void implementFieldEncryption() {
+        // Note: This is conceptual - actual implementation uses Platform Encryption
+
+        Schema.DescribeSObjectResult accountDescribe = Account.sObjectType.getDescribe();
+        Map<String, Schema.SObjectField> fieldMap = accountDescribe.fields.getMap();
+
+        Set<String> sensitiveFields = new Set<String>{
+            'Tax_ID__c', 'Bank_Account__c', 'Social_Security__c'
+        };
+
+        for (String fieldName : sensitiveFields) {
+            if (fieldMap.containsKey(fieldName)) {
+                Schema.DescribeFieldResult fieldDescribe = fieldMap.get(fieldName).getDescribe();
+
+                if (!fieldDescribe.isEncrypted()) {
+                    System.debug('Field ' + fieldName + ' should be encrypted');
+                    // Log recommendation for encryption
+                    logEncryptionRecommendation('Account', fieldName);
+                }
+            }
+        }
+    }
+
+    private static void logEncryptionRecommendation(String objectName, String fieldName) {
+        Security_Recommendation__c recommendation = new Security_Recommendation__c(
+            Object_Name__c = objectName,
+            Field_Name__c = fieldName,
+            Recommendation_Type__c = 'Field Encryption',
+            Risk_Level__c = 'High',
+            Description__c = 'Sensitive field should be encrypted',
+            Recommended_Date__c = System.now()
+        );
+        insert recommendation;
+    }
+}
+\`\`\`
+
+**Master these patterns and you'll design data architectures that scale globally! 🌍**`
+            }
+          }
+        ],
+        quiz: {
+          id: 'data-architecture-quiz',
+          title: 'Data Architecture Mastery Quiz',
+          questions: [
+            {
+              id: 'q1',
+              question: 'What is the primary benefit of implementing data lineage tracking?',
+              options: [
+                'Faster query performance',
+                'Better user interface',
+                'Data transparency and compliance',
+                'Reduced storage costs'
+              ],
+              correctAnswer: 'Data transparency and compliance',
+              explanation: 'Data lineage tracking provides visibility into data movement and transformations, essential for compliance and data governance.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'data-governance'
+            },
+            {
+              id: 'q2',
+              question: 'Which approach is most efficient for retrieving related records?',
+              options: [
+                'Separate queries for each record',
+                'Subqueries in a single SOQL statement',
+                'Multiple API calls',
+                'Batch processing with delays'
+              ],
+              correctAnswer: 'Subqueries in a single SOQL statement',
+              explanation: 'Subqueries eliminate the N+1 query problem and improve performance by retrieving related data in a single database call.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'performance'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'integration-architecture',
+        title: 'Integration Architecture & API Design',
+        description: 'Master enterprise integration patterns, API design, and system orchestration',
+        duration: '4 weeks',
+        completed: false,
+        locked: true,
+        order: 3,
+        lessons: [
+          {
+            id: 'api-design-patterns',
+            title: 'Enterprise API Design & Integration Patterns',
+            type: 'content',
+            duration: '50 min',
+            completed: false,
+            points: 450,
+            order: 1,
+            content: {
+              text: `# Enterprise Integration Mastery 🔌
+
+## API Design Excellence
+
+### 1. **RESTful Service Architecture**
+
+\`\`\`apex
+@RestResource(urlMapping='/api/v2/customers/*')
+global with sharing class CustomerRESTService {
+
+    @HttpGet
+    global static CustomerResponse getCustomer() {
+        try {
+            String customerId = RestContext.request.requestURI.substring(
+                RestContext.request.requestURI.lastIndexOf('/') + 1
+            );
+
+            if (String.isBlank(customerId)) {
+                return createErrorResponse('Customer ID is required', 400);
+            }
+
+            Account customer = [
+                SELECT Id, Name, Type, Industry, AnnualRevenue,
+                       Phone, Website, BillingAddress,
+                       (SELECT Id, Name, Email, Phone FROM Contacts LIMIT 10),
+                       (SELECT Id, Name, StageName, Amount FROM Opportunities
+                        WHERE IsClosed = false LIMIT 5)
+                FROM Account
+                WHERE Id = :customerId
+                OR External_ID__c = :customerId
+                LIMIT 1
+            ];
+
+            CustomerResponse response = new CustomerResponse();
+            response.success = true;
+            response.data = transformToCustomerData(customer);
+            response.metadata = createMetadata();
+
+            return response;
+
+        } catch (QueryException e) {
+            return createErrorResponse('Customer not found', 404);
+        } catch (Exception e) {
+            return createErrorResponse('Internal server error', 500);
+        }
+    }
+
+    @HttpPost
+    global static CustomerResponse createCustomer() {
+        try {
+            String requestBody = RestContext.request.requestBody.toString();
+            CustomerData customerData = (CustomerData) JSON.deserialize(requestBody, CustomerData.class);
+
+            // Validate required fields
+            if (String.isBlank(customerData.name)) {
+                return createErrorResponse('Customer name is required', 400);
+            }
+
+            Account newAccount = new Account(
+                Name = customerData.name,
+                Type = customerData.type,
+                Industry = customerData.industry,
+                Phone = customerData.phone,
+                Website = customerData.website,
+                External_ID__c = customerData.externalId
+            );
+
+            insert newAccount;
+
+            CustomerResponse response = new CustomerResponse();
+            response.success = true;
+            response.data = transformToCustomerData(newAccount);
+            response.message = 'Customer created successfully';
+
+            return response;
+
+        } catch (DmlException e) {
+            return createErrorResponse('Failed to create customer: ' + e.getMessage(), 400);
+        } catch (Exception e) {
+            return createErrorResponse('Internal server error', 500);
+        }
+    }
+
+    @HttpPut
+    global static CustomerResponse updateCustomer() {
+        // Implementation for customer updates
+        return new CustomerResponse();
+    }
+
+    @HttpDelete
+    global static CustomerResponse deleteCustomer() {
+        // Implementation for customer deletion (soft delete)
+        return new CustomerResponse();
+    }
+
+    private static CustomerData transformToCustomerData(Account acc) {
+        CustomerData data = new CustomerData();
+        data.id = acc.Id;
+        data.externalId = acc.External_ID__c;
+        data.name = acc.Name;
+        data.type = acc.Type;
+        data.industry = acc.Industry;
+        data.phone = acc.Phone;
+        data.website = acc.Website;
+        data.contacts = transformContacts(acc.Contacts);
+        data.opportunities = transformOpportunities(acc.Opportunities);
+
+        return data;
+    }
+
+    private static List<ContactData> transformContacts(List<Contact> contacts) {
+        List<ContactData> contactDataList = new List<ContactData>();
+
+        for (Contact con : contacts) {
+            ContactData contactData = new ContactData();
+            contactData.id = con.Id;
+            contactData.name = con.Name;
+            contactData.email = con.Email;
+            contactData.phone = con.Phone;
+            contactDataList.add(contactData);
+        }
+
+        return contactDataList;
+    }
+
+    private static CustomerResponse createErrorResponse(String message, Integer statusCode) {
+        CustomerResponse response = new CustomerResponse();
+        response.success = false;
+        response.error = message;
+        response.statusCode = statusCode;
+        RestContext.response.statusCode = statusCode;
+
+        return response;
+    }
+
+    private static ResponseMetadata createMetadata() {
+        ResponseMetadata metadata = new ResponseMetadata();
+        metadata.version = '2.0';
+        metadata.timestamp = System.now();
+        metadata.requestId = generateRequestId();
+
+        return metadata;
+    }
+
+    private static String generateRequestId() {
+        return 'REQ-' + String.valueOf(System.currentTimeMillis());
+    }
+}
+
+// Response DTOs
+global class CustomerResponse {
+    global Boolean success;
+    global CustomerData data;
+    global String message;
+    global String error;
+    global Integer statusCode;
+    global ResponseMetadata metadata;
+}
+
+global class CustomerData {
+    global String id;
+    global String externalId;
+    global String name;
+    global String type;
+    global String industry;
+    global String phone;
+    global String website;
+    global List<ContactData> contacts;
+    global List<OpportunityData> opportunities;
+}
+\`\`\`
+
+### 2. **Event-Driven Integration**
+
+\`\`\`apex
+public class IntegrationEventHandler {
+
+    public static void handleCustomerEvents(List<Customer_Event__e> events) {
+        List<Integration_Queue__c> queueItems = new List<Integration_Queue__c>();
+
+        for (Customer_Event__e event : events) {
+            // Route to appropriate external systems
+            if (shouldSyncToERP(event)) {
+                queueItems.add(createQueueItem(event, 'ERP_SYNC'));
+            }
+
+            if (shouldSyncToMarketing(event)) {
+                queueItems.add(createQueueItem(event, 'MARKETING_SYNC'));
+            }
+
+            if (shouldSyncToSupport(event)) {
+                queueItems.add(createQueueItem(event, 'SUPPORT_SYNC'));
+            }
+        }
+
+        if (!queueItems.isEmpty()) {
+            insert queueItems;
+            // Trigger async processing
+            IntegrationProcessor.processQueueAsync(queueItems);
+        }
+    }
+
+    private static Integration_Queue__c createQueueItem(Customer_Event__e event, String targetSystem) {
+        return new Integration_Queue__c(
+            Target_System__c = targetSystem,
+            Event_Type__c = event.Event_Type__c,
+            Record_Id__c = event.Account_Id__c,
+            Payload__c = JSON.serialize(event),
+            Status__c = 'Pending',
+            Priority__c = determinePriority(event.Event_Type__c),
+            Created_Date__c = System.now(),
+            Retry_Count__c = 0
+        );
+    }
+
+    private static Boolean shouldSyncToERP(Customer_Event__e event) {
+        Set<String> erpEvents = new Set<String>{
+            'Customer_Created', 'Customer_Updated', 'Customer_Deleted'
+        };
+        return erpEvents.contains(event.Event_Type__c);
+    }
+
+    private static String determinePriority(String eventType) {
+        Map<String, String> priorityMap = new Map<String, String>{
+            'Customer_Created' => 'High',
+            'Customer_Updated' => 'Medium',
+            'Customer_Deleted' => 'High',
+            'Opportunity_Won' => 'Critical'
+        };
+
+        return priorityMap.get(eventType) != null ? priorityMap.get(eventType) : 'Low';
+    }
+}
+\`\`\`
+
+### 3. **Asynchronous Integration Processor**
+
+\`\`\`apex
+public class IntegrationProcessor implements Queueable, Database.AllowsCallouts {
+
+    private List<Integration_Queue__c> queueItems;
+
+    public IntegrationProcessor(List<Integration_Queue__c> items) {
+        this.queueItems = items;
+    }
+
+    public static void processQueueAsync(List<Integration_Queue__c> items) {
+        if (!Test.isRunningTest()) {
+            System.enqueueJob(new IntegrationProcessor(items));
+        }
+    }
+
+    public void execute(QueueableContext context) {
+        List<Integration_Queue__c> toUpdate = new List<Integration_Queue__c>();
+
+        for (Integration_Queue__c item : queueItems) {
+            try {
+                processIntegration(item);
+                item.Status__c = 'Completed';
+                item.Processed_Date__c = System.now();
+
+            } catch (CalloutException e) {
+                handleCalloutError(item, e);
+            } catch (Exception e) {
+                handleGenericError(item, e);
+            }
+
+            toUpdate.add(item);
+        }
+
+        update toUpdate;
+
+        // Process next batch if queue has more items
+        List<Integration_Queue__c> nextBatch = getNextBatch();
+        if (!nextBatch.isEmpty()) {
+            System.enqueueJob(new IntegrationProcessor(nextBatch));
+        }
+    }
+
+    private void processIntegration(Integration_Queue__c item) {
+        switch on item.Target_System__c {
+            when 'ERP_SYNC' {
+                ERPIntegrationService.syncCustomer(item);
+            }
+            when 'MARKETING_SYNC' {
+                MarketingIntegrationService.syncCustomer(item);
+            }
+            when 'SUPPORT_SYNC' {
+                SupportIntegrationService.syncCustomer(item);
+            }
+            when else {
+                throw new IntegrationException('Unknown target system: ' + item.Target_System__c);
+            }
+        }
+    }
+
+    private void handleCalloutError(Integration_Queue__c item, CalloutException e) {
+        item.Retry_Count__c = (item.Retry_Count__c != null ? item.Retry_Count__c : 0) + 1;
+
+        if (item.Retry_Count__c >= 3) {
+            item.Status__c = 'Failed';
+            item.Error_Message__c = 'Max retries exceeded: ' + e.getMessage();
+        } else {
+            item.Status__c = 'Retry';
+            item.Next_Retry_Date__c = System.now().addMinutes((Integer)Math.pow(2, item.Retry_Count__c) * 5);
+        }
+    }
+
+    private List<Integration_Queue__c> getNextBatch() {
+        return [
+            SELECT Id, Target_System__c, Event_Type__c, Record_Id__c,
+                   Payload__c, Priority__c, Retry_Count__c
+            FROM Integration_Queue__c
+            WHERE Status__c IN ('Pending', 'Retry')
+            AND (Next_Retry_Date__c <= :System.now() OR Next_Retry_Date__c = null)
+            ORDER BY Priority__c DESC, Created_Date__c ASC
+            LIMIT 10
+        ];
+    }
+
+    public class IntegrationException extends Exception {}
+}
+\`\`\`
+
+## External System Integration 🌐
+
+### 1. **ERP Integration Service**
+
+\`\`\`apex
+public class ERPIntegrationService {
+
+    private static final String ERP_ENDPOINT = 'https://erp.company.com/api/v1';
+    private static final String API_KEY_NAME = 'ERP_API_Key';
+
+    public static void syncCustomer(Integration_Queue__c queueItem) {
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(ERP_ENDPOINT + '/customers');
+        request.setMethod('POST');
+        request.setHeader('Content-Type', 'application/json');
+        request.setHeader('Authorization', 'Bearer ' + getAPIKey());
+        request.setTimeout(30000);
+
+        ERPCustomerData erpData = transformToERPFormat(queueItem);
+        request.setBody(JSON.serialize(erpData));
+
+        Http http = new Http();
+        HttpResponse response = http.send(request);
+
+        if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+            System.debug('ERP sync successful: ' + response.getBody());
+        } else {
+            throw new CalloutException('ERP sync failed: ' + response.getStatusCode() + ' ' + response.getBody());
+        }
+    }
+
+    private static ERPCustomerData transformToERPFormat(Integration_Queue__c queueItem) {
+        Customer_Event__e event = (Customer_Event__e) JSON.deserialize(
+            queueItem.Payload__c,
+            Customer_Event__e.class
+        );
+
+        ERPCustomerData erpData = new ERPCustomerData();
+        erpData.externalId = event.Account_Id__c;
+        erpData.name = event.Account_Name__c;
+        erpData.industry = event.Industry__c;
+        erpData.revenue = event.Annual_Revenue__c;
+        erpData.lastModified = event.Event_Timestamp__c;
+
+        return erpData;
+    }
+
+    private static String getAPIKey() {
+        // Retrieve from Custom Settings or Named Credentials
+        return 'api_key_placeholder';
+    }
+
+    public class ERPCustomerData {
+        public String externalId;
+        public String name;
+        public String industry;
+        public Decimal revenue;
+        public DateTime lastModified;
+    }
+}
+\`\`\`
+
+**Master these integration patterns and you'll orchestrate entire enterprise ecosystems! 🎼**`
+            }
+          },
+          {
+            id: 'system-orchestration',
+            title: 'System Orchestration & Workflow Design',
+            type: 'content',
+            duration: '45 min',
+            completed: false,
+            points: 400,
+            order: 2,
+            content: {
+              text: `# System Orchestration Excellence 🎼
+
+## Complex Workflow Orchestration
+
+### 1. **Multi-System Business Process**
+
+\`\`\`apex
+public class OrderProcessOrchestrator {
+
+    public class OrderContext {
+        public Order orderRecord;
+        public Account customer;
+        public List<OrderItem> orderItems;
+        public Map<String, Object> metadata;
+    }
+
+    public static void orchestrateOrderProcess(Id orderId) {
+        OrderContext context = initializeOrderContext(orderId);
+
+        try {
+            // Step 1: Validate order
+            validateOrder(context);
+
+            // Step 2: Check inventory
+            checkInventoryAvailability(context);
+
+            // Step 3: Process payment
+            processPayment(context);
+
+            // Step 4: Reserve inventory
+            reserveInventory(context);
+
+            // Step 5: Create fulfillment request
+            createFulfillmentRequest(context);
+
+            // Step 6: Update ERP
+            syncToERP(context);
+
+            // Step 7: Notify customer
+            notifyCustomer(context);
+
+            // Step 8: Update analytics
+            updateAnalytics(context);
+
+            finalizeOrder(context);
+
+        } catch (Exception e) {
+            handleOrchestrationError(context, e);
+        }
+    }
+
+    private static OrderContext initializeOrderContext(Id orderId) {
+        OrderContext context = new OrderContext();
+
+        context.orderRecord = [
+            SELECT Id, OrderNumber, Status, TotalAmount,
+                   AccountId, Account.Name, Account.Type
+            FROM Order
+            WHERE Id = :orderId
+        ];
+
+        context.customer = context.orderRecord.Account;
+
+        context.orderItems = [
+            SELECT Id, Product2Id, Quantity, UnitPrice, TotalPrice,
+                   Product2.Name, Product2.ProductCode
+            FROM OrderItem
+            WHERE OrderId = :orderId
+        ];
+
+        context.metadata = new Map<String, Object>{
+            'startTime' => System.now(),
+            'orchestrationId' => generateOrchestrationId(),
+            'stepResults' => new Map<String, Object>()
+        };
+
+        return context;
+    }
+
+    private static void validateOrder(OrderContext context) {
+        List<String> validationErrors = new List<String>();
+
+        // Business validation rules
+        if (context.orderRecord.TotalAmount <= 0) {
+            validationErrors.add('Order amount must be greater than zero');
+        }
+
+        if (context.orderItems.isEmpty()) {
+            validationErrors.add('Order must contain at least one item');
+        }
+
+        if (context.customer.Type == 'Competitor') {
+            validationErrors.add('Cannot process orders for competitors');
+        }
+
+        if (!validationErrors.isEmpty()) {
+            throw new OrchestrationException('Validation failed: ' + String.join(validationErrors, '; '));
+        }
+
+        updateStepResult(context, 'validation', 'success');
+    }
+
+    private static void checkInventoryAvailability(OrderContext context) {
+        InventoryService.InventoryCheckResult result = InventoryService.checkAvailability(context.orderItems);
+
+        if (!result.allItemsAvailable) {
+            List<String> unavailableItems = new List<String>();
+            for (InventoryService.ItemAvailability item : result.itemAvailabilities) {
+                if (!item.isAvailable) {
+                    unavailableItems.add(item.productName + ' (Need: ' + item.requestedQuantity + ', Available: ' + item.availableQuantity + ')');
+                }
+            }
+
+            throw new OrchestrationException('Insufficient inventory: ' + String.join(unavailableItems, '; '));
+        }
+
+        updateStepResult(context, 'inventory', result);
+    }
+
+    private static void processPayment(OrderContext context) {
+        PaymentService.PaymentRequest paymentRequest = new PaymentService.PaymentRequest();
+        paymentRequest.orderId = context.orderRecord.Id;
+        paymentRequest.amount = context.orderRecord.TotalAmount;
+        paymentRequest.customerId = context.customer.Id;
+
+        PaymentService.PaymentResult paymentResult = PaymentService.processPayment(paymentRequest);
+
+        if (!paymentResult.success) {
+            throw new OrchestrationException('Payment failed: ' + paymentResult.errorMessage);
+        }
+
+        // Update order with payment information
+        context.orderRecord.Payment_Status__c = 'Paid';
+        context.orderRecord.Payment_Transaction_Id__c = paymentResult.transactionId;
+        update context.orderRecord;
+
+        updateStepResult(context, 'payment', paymentResult);
+    }
+
+    private static void reserveInventory(OrderContext context) {
+        List<Inventory_Reservation__c> reservations = new List<Inventory_Reservation__c>();
+
+        for (OrderItem item : context.orderItems) {
+            Inventory_Reservation__c reservation = new Inventory_Reservation__c(
+                Order_Id__c = context.orderRecord.Id,
+                Product_Id__c = item.Product2Id,
+                Quantity__c = item.Quantity,
+                Reserved_Date__c = System.now(),
+                Expiration_Date__c = System.now().addDays(7),
+                Status__c = 'Reserved'
+            );
+            reservations.add(reservation);
+        }
+
+        insert reservations;
+        updateStepResult(context, 'reservation', reservations);
+    }
+
+    private static void createFulfillmentRequest(OrderContext context) {
+        Fulfillment_Request__c fulfillmentRequest = new Fulfillment_Request__c(
+            Order_Id__c = context.orderRecord.Id,
+            Customer_Name__c = context.customer.Name,
+            Request_Date__c = System.now(),
+            Priority__c = determineFulfillmentPriority(context),
+            Status__c = 'Pending',
+            Shipping_Instructions__c = generateShippingInstructions(context)
+        );
+
+        insert fulfillmentRequest;
+
+        // Notify fulfillment team
+        FulfillmentNotificationService.notifyFulfillmentTeam(fulfillmentRequest);
+
+        updateStepResult(context, 'fulfillment', fulfillmentRequest);
+    }
+
+    private static void syncToERP(OrderContext context) {
+        ERPSyncService.syncOrderToERP(context.orderRecord, context.orderItems);
+        updateStepResult(context, 'erp_sync', 'success');
+    }
+
+    private static void notifyCustomer(OrderContext context) {
+        CustomerNotificationService.sendOrderConfirmation(
+            context.customer.Id,
+            context.orderRecord.Id
+        );
+        updateStepResult(context, 'customer_notification', 'success');
+    }
+
+    private static void updateAnalytics(OrderContext context) {
+        AnalyticsService.recordOrderProcessingMetrics(context);
+        updateStepResult(context, 'analytics', 'success');
+    }
+
+    private static void finalizeOrder(OrderContext context) {
+        context.orderRecord.Status = 'Processing';
+        context.orderRecord.Processing_Started_Date__c = System.now();
+        update context.orderRecord;
+
+        // Log successful orchestration
+        logOrchestrationSuccess(context);
+    }
+
+    private static void handleOrchestrationError(OrderContext context, Exception e) {
+        // Rollback operations
+        rollbackOperations(context);
+
+        // Update order status
+        context.orderRecord.Status = 'Failed';
+        context.orderRecord.Error_Message__c = e.getMessage();
+        update context.orderRecord;
+
+        // Log error
+        logOrchestrationError(context, e);
+
+        // Notify operations team
+        notifyOperationsTeam(context, e);
+    }
+
+    private static void rollbackOperations(OrderContext context) {
+        Map<String, Object> stepResults = (Map<String, Object>) context.metadata.get('stepResults');
+
+        // Rollback payment if processed
+        if (stepResults.containsKey('payment')) {
+            PaymentService.refundPayment(context.orderRecord.Payment_Transaction_Id__c);
+        }
+
+        // Release inventory reservations
+        if (stepResults.containsKey('reservation')) {
+            List<Inventory_Reservation__c> reservations = (List<Inventory_Reservation__c>) stepResults.get('reservation');
+            for (Inventory_Reservation__c reservation : reservations) {
+                reservation.Status__c = 'Cancelled';
+            }
+            update reservations;
+        }
+    }
+
+    private static void updateStepResult(OrderContext context, String stepName, Object result) {
+        Map<String, Object> stepResults = (Map<String, Object>) context.metadata.get('stepResults');
+        stepResults.put(stepName, result);
+    }
+
+    private static String generateOrchestrationId() {
+        return 'ORCH-' + String.valueOf(System.currentTimeMillis());
+    }
+
+    public class OrchestrationException extends Exception {}
+}
+\`\`\`
+
+### 2. **Workflow State Management**
+
+\`\`\`apex
+public class WorkflowStateManager {
+
+    public enum WorkflowState {
+        INITIATED, VALIDATED, APPROVED, IN_PROGRESS, COMPLETED, FAILED, CANCELLED
+    }
+
+    public class WorkflowContext {
+        public String workflowId;
+        public String workflowType;
+        public WorkflowState currentState;
+        public Map<String, Object> data;
+        public List<WorkflowStep> completedSteps;
+        public List<WorkflowStep> pendingSteps;
+        public DateTime startTime;
+        public DateTime lastUpdated;
+    }
+
+    public class WorkflowStep {
+        public String stepId;
+        public String stepName;
+        public WorkflowState requiredState;
+        public Boolean isCompleted;
+        public DateTime completedTime;
+        public String assignedTo;
+        public Map<String, Object> stepData;
+    }
+
+    public static WorkflowContext initializeWorkflow(String workflowType, Map<String, Object> initialData) {
+        WorkflowContext context = new WorkflowContext();
+        context.workflowId = generateWorkflowId();
+        context.workflowType = workflowType;
+        context.currentState = WorkflowState.INITIATED;
+        context.data = initialData;
+        context.completedSteps = new List<WorkflowStep>();
+        context.pendingSteps = getWorkflowSteps(workflowType);
+        context.startTime = System.now();
+        context.lastUpdated = System.now();
+
+        // Persist workflow state
+        persistWorkflowState(context);
+
+        return context;
+    }
+
+    public static void transitionWorkflow(String workflowId, WorkflowState newState, Map<String, Object> stepData) {
+        WorkflowContext context = loadWorkflowContext(workflowId);
+
+        if (!isValidTransition(context.currentState, newState)) {
+            throw new WorkflowException('Invalid state transition from ' + context.currentState + ' to ' + newState);
+        }
+
+        context.currentState = newState;
+        context.lastUpdated = System.now();
+
+        // Update step completion
+        updateStepCompletion(context, stepData);
+
+        // Execute transition actions
+        executeTransitionActions(context, newState);
+
+        // Persist updated state
+        persistWorkflowState(context);
+
+        // Trigger next steps if applicable
+        triggerNextSteps(context);
+    }
+
+    private static Boolean isValidTransition(WorkflowState currentState, WorkflowState newState) {
+        Map<WorkflowState, Set<WorkflowState>> validTransitions = new Map<WorkflowState, Set<WorkflowState>>{
+            WorkflowState.INITIATED => new Set<WorkflowState>{WorkflowState.VALIDATED, WorkflowState.FAILED, WorkflowState.CANCELLED},
+            WorkflowState.VALIDATED => new Set<WorkflowState>{WorkflowState.APPROVED, WorkflowState.FAILED, WorkflowState.CANCELLED},
+            WorkflowState.APPROVED => new Set<WorkflowState>{WorkflowState.IN_PROGRESS, WorkflowState.CANCELLED},
+            WorkflowState.IN_PROGRESS => new Set<WorkflowState>{WorkflowState.COMPLETED, WorkflowState.FAILED, WorkflowState.CANCELLED},
+            WorkflowState.COMPLETED => new Set<WorkflowState>{}, // Terminal state
+            WorkflowState.FAILED => new Set<WorkflowState>{WorkflowState.INITIATED}, // Allow restart
+            WorkflowState.CANCELLED => new Set<WorkflowState>{} // Terminal state
+        };
+
+        return validTransitions.get(currentState)?.contains(newState) == true;
+    }
+
+    private static void executeTransitionActions(WorkflowContext context, WorkflowState newState) {
+        switch on newState {
+            when VALIDATED {
+                // Send notification to approvers
+                NotificationService.notifyApprovers(context);
+            }
+            when APPROVED {
+                // Assign to processing team
+                AssignmentService.assignToProcessingTeam(context);
+            }
+            when IN_PROGRESS {
+                // Start monitoring
+                MonitoringService.startWorkflowMonitoring(context.workflowId);
+            }
+            when COMPLETED {
+                // Send completion notifications
+                NotificationService.notifyWorkflowCompletion(context);
+                // Archive workflow data
+                ArchiveService.archiveWorkflow(context);
+            }
+            when FAILED {
+                // Send failure notifications
+                NotificationService.notifyWorkflowFailure(context);
+                // Trigger error handling
+                ErrorHandlingService.handleWorkflowFailure(context);
+            }
+        }
+    }
+
+    public class WorkflowException extends Exception {}
+}
+\`\`\`
+
+### 3. **Distributed Transaction Management**
+
+\`\`\`apex
+public class DistributedTransactionManager {
+
+    public class TransactionContext {
+        public String transactionId;
+        public List<TransactionStep> steps;
+        public TransactionState state;
+        public DateTime startTime;
+        public String compensationPlan;
+    }
+
+    public enum TransactionState {
+        STARTED, COMMITTED, ABORTED, COMPENSATING, COMPENSATED
+    }
+
+    public class TransactionStep {
+        public String stepId;
+        public String serviceName;
+        public String operation;
+        public Map<String, Object> parameters;
+        public Boolean isCompleted;
+        public String compensationOperation;
+        public Map<String, Object> compensationData;
+    }
+
+    public static TransactionContext beginDistributedTransaction(List<TransactionStep> steps) {
+        TransactionContext context = new TransactionContext();
+        context.transactionId = generateTransactionId();
+        context.steps = steps;
+        context.state = TransactionState.STARTED;
+        context.startTime = System.now();
+
+        // Log transaction start
+        logTransactionEvent(context, 'Transaction Started');
+
+        return context;
+    }
+
+    public static void executeTransaction(TransactionContext context) {
+        try {
+            // Execute all steps
+            for (TransactionStep step : context.steps) {
+                executeStep(step);
+                step.isCompleted = true;
+
+                // Log step completion
+                logTransactionEvent(context, 'Step Completed: ' + step.stepId);
+            }
+
+            // Commit transaction
+            commitTransaction(context);
+
+        } catch (Exception e) {
+            // Abort and compensate
+            abortTransaction(context, e);
+        }
+    }
+
+    private static void executeStep(TransactionStep step) {
+        switch on step.serviceName {
+            when 'InventoryService' {
+                InventoryService.executeOperation(step.operation, step.parameters);
+            }
+            when 'PaymentService' {
+                PaymentService.executeOperation(step.operation, step.parameters);
+            }
+            when 'ERPService' {
+                ERPService.executeOperation(step.operation, step.parameters);
+            }
+            when else {
+                throw new TransactionException('Unknown service: ' + step.serviceName);
+            }
+        }
+    }
+
+    private static void commitTransaction(TransactionContext context) {
+        context.state = TransactionState.COMMITTED;
+        logTransactionEvent(context, 'Transaction Committed');
+
+        // Send commit confirmations to all services
+        for (TransactionStep step : context.steps) {
+            sendCommitConfirmation(step);
+        }
+    }
+
+    private static void abortTransaction(TransactionContext context, Exception error) {
+        context.state = TransactionState.ABORTED;
+        logTransactionEvent(context, 'Transaction Aborted: ' + error.getMessage());
+
+        // Start compensation
+        compensateTransaction(context);
+    }
+
+    private static void compensateTransaction(TransactionContext context) {
+        context.state = TransactionState.COMPENSATING;
+        logTransactionEvent(context, 'Starting Compensation');
+
+        // Execute compensation steps in reverse order
+        for (Integer i = context.steps.size() - 1; i >= 0; i--) {
+            TransactionStep step = context.steps[i];
+
+            if (step.isCompleted) {
+                executeCompensation(step);
+                logTransactionEvent(context, 'Compensation Executed: ' + step.stepId);
+            }
+        }
+
+        context.state = TransactionState.COMPENSATED;
+        logTransactionEvent(context, 'Compensation Completed');
+    }
+
+    private static void executeCompensation(TransactionStep step) {
+        switch on step.serviceName {
+            when 'InventoryService' {
+                InventoryService.executeOperation(step.compensationOperation, step.compensationData);
+            }
+            when 'PaymentService' {
+                PaymentService.executeOperation(step.compensationOperation, step.compensationData);
+            }
+            when 'ERPService' {
+                ERPService.executeOperation(step.compensationOperation, step.compensationData);
+            }
+        }
+    }
+
+    public class TransactionException extends Exception {}
+}
+\`\`\`
+
+**Master these orchestration patterns and you'll conduct enterprise symphonies! 🎼**`
+            }
+          }
+        ],
+        quiz: {
+          id: 'integration-architecture-quiz',
+          title: 'Integration Architecture Mastery Quiz',
+          questions: [
+            {
+              id: 'q1',
+              question: 'What is the primary benefit of implementing event-driven integration architecture?',
+              options: [
+                'Reduced code complexity',
+                'Lower storage costs',
+                'Loose coupling and scalability',
+                'Faster user interface'
+              ],
+              correctAnswer: 'Loose coupling and scalability',
+              explanation: 'Event-driven architecture enables loose coupling between systems and improved scalability through asynchronous processing.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'integration'
+            },
+            {
+              id: 'q2',
+              question: 'In distributed transaction management, what is the purpose of compensation operations?',
+              options: [
+                'To improve performance',
+                'To undo completed steps when a transaction fails',
+                'To reduce memory usage',
+                'To enhance security'
+              ],
+              correctAnswer: 'To undo completed steps when a transaction fails',
+              explanation: 'Compensation operations provide a way to rollback or undo changes made by completed steps when a distributed transaction fails.',
+              points: 30,
+              difficulty: 'hard',
+              category: 'transactions'
+            }
+          ],
+          passingScore: 80,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'performance-scalability',
+        title: 'Performance & Scalability Engineering',
+        description: 'Master performance optimization, scalability patterns, and system monitoring',
+        duration: '3 weeks',
+        completed: false,
+        locked: true,
+        order: 4,
+        lessons: [
+          {
+            id: 'performance-optimization',
+            title: 'Enterprise Performance Optimization Strategies',
+            type: 'content',
+            duration: '45 min',
+            completed: false,
+            points: 400,
+            order: 1,
+            content: {
+              text: `# Performance Engineering Mastery ⚡
+
+## Advanced Performance Optimization
+
+### 1. **Query Performance Optimization**
+
+\`\`\`apex
+public class QueryOptimizationService {
+
+    // Anti-pattern: N+1 Query Problem
+    public static void inefficientAccountProcessing() {
+        List<Account> accounts = [SELECT Id, Name FROM Account LIMIT 100];
+
+        for (Account acc : accounts) {
+            // This creates 100 separate queries!
+            List<Contact> contacts = [
+                SELECT Id, Name, Email
+                FROM Contact
+                WHERE AccountId = :acc.Id
+            ];
+
+            List<Opportunity> opps = [
+                SELECT Id, Name, Amount
+                FROM Opportunity
+                WHERE AccountId = :acc.Id
+            ];
+
+            processAccountData(acc, contacts, opps);
+        }
+    }
+
+    // Optimized: Single Query with Subqueries
+    public static void efficientAccountProcessing() {
+        List<Account> accounts = [
+            SELECT Id, Name, Type, Industry,
+                   (SELECT Id, Name, Email FROM Contacts),
+                   (SELECT Id, Name, Amount, StageName FROM Opportunities
+                    WHERE StageName NOT IN ('Closed Won', 'Closed Lost'))
+            FROM Account
+            LIMIT 100
+        ];
+
+        for (Account acc : accounts) {
+            processAccountData(acc, acc.Contacts, acc.Opportunities);
+        }
+    }
+
+    // Advanced: Selective Query Optimization
+    public static Map<Id, AccountSummary> getAccountSummaries(Set<Id> accountIds, String dataLevel) {
+        Map<Id, AccountSummary> summaries = new Map<Id, AccountSummary>();
+
+        String query = buildOptimizedQuery(dataLevel);
+        List<Account> accounts = Database.query(query);
+
+        for (Account acc : accounts) {
+            AccountSummary summary = new AccountSummary();
+            summary.account = acc;
+            summary.contactCount = acc.Contacts?.size() ?? 0;
+            summary.opportunityValue = calculateOpportunityValue(acc.Opportunities);
+            summary.lastActivityDate = getLastActivityDate(acc);
+
+            summaries.put(acc.Id, summary);
+        }
+
+        return summaries;
+    }
+
+    private static String buildOptimizedQuery(String dataLevel) {
+        String baseQuery = 'SELECT Id, Name, Type, Industry, AnnualRevenue ';
+
+        switch on dataLevel {
+            when 'BASIC' {
+                return baseQuery + 'FROM Account WHERE Id IN :accountIds';
+            }
+            when 'WITH_CONTACTS' {
+                return baseQuery +
+                       ', (SELECT Id, Name, Email FROM Contacts) ' +
+                       'FROM Account WHERE Id IN :accountIds';
+            }
+            when 'FULL' {
+                return baseQuery +
+                       ', (SELECT Id, Name, Email FROM Contacts), ' +
+                       '(SELECT Id, Name, Amount, StageName, CloseDate FROM Opportunities) ' +
+                       'FROM Account WHERE Id IN :accountIds';
+            }
+            when else {
+                return baseQuery + 'FROM Account WHERE Id IN :accountIds';
+            }
+        }
+    }
+
+    public class AccountSummary {
+        public Account account;
+        public Integer contactCount;
+        public Decimal opportunityValue;
+        public Date lastActivityDate;
+    }
+}
+\`\`\`
+
+### 2. **Bulk Data Processing Optimization**
+
+\`\`\`apex
+public class BulkProcessingOptimizer {
+
+    public static void processBulkRecords(List<SObject> records) {
+        Integer batchSize = 200;
+        List<List<SObject>> batches = createBatches(records, batchSize);
+
+        for (List<SObject> batch : batches) {
+            processBatch(batch);
+        }
+    }
+
+    private static List<List<SObject>> createBatches(List<SObject> records, Integer batchSize) {
+        List<List<SObject>> batches = new List<List<SObject>>();
+
+        for (Integer i = 0; i < records.size(); i += batchSize) {
+            List<SObject> batch = new List<SObject>();
+
+            for (Integer j = i; j < Math.min(i + batchSize, records.size()); j++) {
+                batch.add(records[j]);
+            }
+
+            batches.add(batch);
+        }
+
+        return batches;
+    }
+
+    private static void processBatch(List<SObject> batch) {
+        try {
+            // Optimized DML with partial success
+            Database.SaveResult[] results = Database.insert(batch, false);
+
+            List<String> errors = new List<String>();
+            for (Integer i = 0; i < results.size(); i++) {
+                if (!results[i].isSuccess()) {
+                    for (Database.Error error : results[i].getErrors()) {
+                        errors.add('Record ' + i + ': ' + error.getMessage());
+                    }
+                }
+            }
+
+            if (!errors.isEmpty()) {
+                System.debug('Batch processing errors: ' + String.join(errors, '; '));
+            }
+
+        } catch (Exception e) {
+            System.debug('Batch processing failed: ' + e.getMessage());
+        }
+    }
+
+    // Memory-efficient large dataset processing
+    public static void processLargeDataset(String objectType, String whereClause) {
+        String query = 'SELECT Id FROM ' + objectType;
+        if (String.isNotBlank(whereClause)) {
+            query += ' WHERE ' + whereClause;
+        }
+
+        // Use QueryLocator for large datasets
+        Database.QueryLocator queryLocator = Database.getQueryLocator(query);
+
+        Integer batchSize = 2000;
+        Integer offset = 0;
+
+        do {
+            List<SObject> batch = Database.query(query + ' LIMIT ' + batchSize + ' OFFSET ' + offset);
+
+            if (batch.isEmpty()) {
+                break;
+            }
+
+            processRecordBatch(batch);
+            offset += batchSize;
+
+            // Prevent governor limit issues
+            if (Limits.getQueryRows() > 40000) {
+                break;
+            }
+
+        } while (true);
+    }
+
+    private static void processRecordBatch(List<SObject> records) {
+        // Process each batch efficiently
+        for (SObject record : records) {
+            // Perform operations
+        }
+    }
+}
+\`\`\`
+
+### 3. **Caching Strategies**
+
+\`\`\`apex
+public class CacheOptimizationService {
+
+    private static final String CACHE_PARTITION = 'PerformanceCache';
+    private static final Integer DEFAULT_TTL = 3600; // 1 hour
+
+    public static Object getCachedData(String cacheKey, Type dataType) {
+        // Try to get from cache first
+        Object cachedData = Cache.Org.get(CACHE_PARTITION + '.' + cacheKey);
+
+        if (cachedData != null) {
+            return cachedData;
+        }
+
+        // If not in cache, fetch from database
+        Object freshData = fetchDataFromDatabase(cacheKey, dataType);
+
+        // Store in cache for future use
+        Cache.Org.put(CACHE_PARTITION + '.' + cacheKey, freshData, DEFAULT_TTL);
+
+        return freshData;
+    }
+
+    public static void invalidateCache(String cacheKey) {
+        Cache.Org.remove(CACHE_PARTITION + '.' + cacheKey);
+    }
+
+    public static void warmupCache() {
+        // Pre-populate frequently accessed data
+        List<String> frequentKeys = new List<String>{
+            'active_products', 'user_permissions', 'configuration_settings'
+        };
+
+        for (String key : frequentKeys) {
+            getCachedData(key, Object.class);
+        }
+    }
+
+    // Intelligent cache management
+    public static Map<String, Product2> getCachedProducts(Set<String> productCodes) {
+        Map<String, Product2> products = new Map<String, Product2>();
+        Set<String> uncachedCodes = new Set<String>();
+
+        // Check cache for each product
+        for (String code : productCodes) {
+            String cacheKey = 'product_' + code;
+            Product2 cachedProduct = (Product2) getCachedData(cacheKey, Product2.class);
+
+            if (cachedProduct != null) {
+                products.put(code, cachedProduct);
+            } else {
+                uncachedCodes.add(code);
+            }
+        }
+
+        // Fetch uncached products from database
+        if (!uncachedCodes.isEmpty()) {
+            List<Product2> freshProducts = [
+                SELECT Id, Name, ProductCode, IsActive, Description
+                FROM Product2
+                WHERE ProductCode IN :uncachedCodes
+                AND IsActive = true
+            ];
+
+            // Add to cache and result map
+            for (Product2 product : freshProducts) {
+                String cacheKey = 'product_' + product.ProductCode;
+                Cache.Org.put(CACHE_PARTITION + '.' + cacheKey, product, DEFAULT_TTL);
+                products.put(product.ProductCode, product);
+            }
+        }
+
+        return products;
+    }
+
+    private static Object fetchDataFromDatabase(String cacheKey, Type dataType) {
+        // Implement data fetching logic based on cache key
+        if (cacheKey.startsWith('product_')) {
+            String productCode = cacheKey.substring(8);
+            List<Product2> products = [
+                SELECT Id, Name, ProductCode, IsActive, Description
+                FROM Product2
+                WHERE ProductCode = :productCode
+                LIMIT 1
+            ];
+            return products.isEmpty() ? null : products[0];
+        }
+
+        return null;
+    }
+}
+\`\`\`
+
+## Scalability Patterns 📈
+
+### 1. **Horizontal Scaling Strategies**
+
+\`\`\`apex
+public class ScalabilityService {
+
+    public static void distributeWorkload(List<SObject> records, String operation) {
+        Integer orgLimit = Limits.getLimitDmlRows();
+        Integer availableRows = orgLimit - Limits.getDmlRows();
+
+        if (records.size() > availableRows) {
+            // Queue remaining records for async processing
+            queueAsyncProcessing(records.subList(availableRows, records.size()), operation);
+            records = records.subList(0, availableRows);
+        }
+
+        processRecordsSync(records, operation);
+    }
+
+    private static void queueAsyncProcessing(List<SObject> records, String operation) {
+        // Use Queueable for chaining
+        if (!Test.isRunningTest()) {
+            System.enqueueJob(new AsyncRecordProcessor(records, operation));
+        }
+    }
+
+    // Implement partitioning for large datasets
+    public static void partitionedProcessing(String objectType, Date startDate, Date endDate) {
+        List<DateRange> partitions = createDatePartitions(startDate, endDate, 30); // 30-day partitions
+
+        for (DateRange partition : partitions) {
+            processPartition(objectType, partition);
+        }
+    }
+
+    private static List<DateRange> createDatePartitions(Date startDate, Date endDate, Integer dayIncrement) {
+        List<DateRange> partitions = new List<DateRange>();
+        Date currentStart = startDate;
+
+        while (currentStart <= endDate) {
+            Date currentEnd = currentStart.addDays(dayIncrement - 1);
+            if (currentEnd > endDate) {
+                currentEnd = endDate;
+            }
+
+            partitions.add(new DateRange(currentStart, currentEnd));
+            currentStart = currentEnd.addDays(1);
+        }
+
+        return partitions;
+    }
+
+    private static void processPartition(String objectType, DateRange range) {
+        String query = 'SELECT Id FROM ' + objectType +
+                      ' WHERE CreatedDate >= :range.startDate AND CreatedDate <= :range.endDate';
+
+        List<SObject> records = Database.query(query);
+
+        // Process this partition
+        processRecordsSync(records, 'UPDATE');
+    }
+
+    public class DateRange {
+        public Date startDate;
+        public Date endDate;
+
+        public DateRange(Date start, Date end) {
+            this.startDate = start;
+            this.endDate = end;
+        }
+    }
+}
+\`\`\`
+
+### 2. **Performance Monitoring**
+
+\`\`\`apex
+public class PerformanceMonitor {
+
+    public static void monitorMethodPerformance(String methodName, String className) {
+        Long startTime = System.currentTimeMillis();
+        Integer startCpuTime = Limits.getCpuTime();
+        Integer startQueries = Limits.getQueries();
+        Integer startDmlStatements = Limits.getDmlStatements();
+
+        try {
+            // Method execution would happen here
+            executeMonitoredMethod(methodName, className);
+
+        } finally {
+            // Capture end metrics
+            Long endTime = System.currentTimeMillis();
+            Integer endCpuTime = Limits.getCpuTime();
+            Integer endQueries = Limits.getQueries();
+            Integer endDmlStatements = Limits.getDmlStatements();
+
+            // Calculate metrics
+            Long executionTime = endTime - startTime;
+            Integer cpuTimeUsed = endCpuTime - startCpuTime;
+            Integer queriesExecuted = endQueries - startQueries;
+            Integer dmlStatementsExecuted = endDmlStatements - startDmlStatements;
+
+            // Log performance metrics
+            Performance_Metric__c metric = new Performance_Metric__c(
+                Method_Name__c = methodName,
+                Class_Name__c = className,
+                Execution_Time_Ms__c = executionTime,
+                CPU_Time_Ms__c = cpuTimeUsed,
+                Queries_Executed__c = queriesExecuted,
+                DML_Statements__c = dmlStatementsExecuted,
+                Execution_Date__c = System.now()
+            );
+
+            insert metric;
+
+            // Alert if performance thresholds exceeded
+            checkPerformanceThresholds(metric);
+        }
+    }
+
+    private static void checkPerformanceThresholds(Performance_Metric__c metric) {
+        List<String> alerts = new List<String>();
+
+        if (metric.Execution_Time_Ms__c > 10000) { // 10 seconds
+            alerts.add('Execution time exceeded 10 seconds');
+        }
+
+        if (metric.CPU_Time_Ms__c > 5000) { // 5 seconds
+            alerts.add('CPU time exceeded 5 seconds');
+        }
+
+        if (metric.Queries_Executed__c > 50) {
+            alerts.add('Query count exceeded 50');
+        }
+
+        if (!alerts.isEmpty()) {
+            sendPerformanceAlert(metric, alerts);
+        }
+    }
+
+    private static void sendPerformanceAlert(Performance_Metric__c metric, List<String> alerts) {
+        Performance_Alert__c alert = new Performance_Alert__c(
+            Method_Name__c = metric.Method_Name__c,
+            Class_Name__c = metric.Class_Name__c,
+            Alert_Type__c = 'Performance Threshold Exceeded',
+            Alert_Details__c = String.join(alerts, '; '),
+            Metric_Id__c = metric.Id,
+            Alert_Date__c = System.now()
+        );
+
+        insert alert;
+    }
+}
+\`\`\`
+
+**Master these performance patterns and your systems will fly at enterprise scale! 🚀**`
+            }
+          }
+        ],
+        quiz: {
+          id: 'performance-scalability-quiz',
+          title: 'Performance & Scalability Mastery Quiz',
+          questions: [
+            {
+              id: 'q1',
+              question: 'What is the primary cause of the N+1 query problem?',
+              options: [
+                'Using too many fields in SELECT statements',
+                'Executing queries inside loops instead of using bulk operations',
+                'Not using proper indexing',
+                'Using complex WHERE clauses'
+              ],
+              correctAnswer: 'Executing queries inside loops instead of using bulk operations',
+              explanation: 'The N+1 problem occurs when you execute a query inside a loop, creating one query for the initial dataset plus N additional queries for each record.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'performance'
+            },
+            {
+              id: 'q2',
+              question: 'Which caching strategy provides the best performance for frequently accessed data?',
+              options: [
+                'No caching',
+                'Database-level caching only',
+                'Application-level caching with TTL',
+                'File system caching'
+              ],
+              correctAnswer: 'Application-level caching with TTL',
+              explanation: 'Application-level caching with Time-To-Live (TTL) provides the fastest access to frequently used data while ensuring data freshness.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'caching'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'security-compliance',
+        title: 'Security Architecture & Compliance',
+        description: 'Design secure, compliant enterprise solutions with advanced security patterns',
+        duration: '3 weeks',
+        completed: false,
+        locked: true,
+        order: 5,
+        lessons: [
+          {
+            id: 'security-architecture',
+            title: 'Enterprise Security Architecture Design',
+            type: 'content',
+            duration: '50 min',
+            completed: false,
+            points: 500,
+            order: 1,
+            content: {
+              text: `# Security Architecture Mastery 🛡️
+
+## Enterprise Security Design
+
+### 1. **Multi-Layer Security Architecture**
+
+\`\`\`apex
+public class SecurityArchitectureService {
+
+    // Authentication Layer
+    public static Boolean authenticateUser(String username, String password, String securityToken) {
+        try {
+            // Implement multi-factor authentication
+            Boolean basicAuth = validateCredentials(username, password);
+            Boolean tokenAuth = validateSecurityToken(securityToken);
+            Boolean deviceAuth = validateDeviceFingerprint();
+
+            if (basicAuth && tokenAuth && deviceAuth) {
+                logSuccessfulAuthentication(username);
+                return true;
+            } else {
+                logFailedAuthentication(username, 'Multi-factor authentication failed');
+                return false;
+            }
+
+        } catch (Exception e) {
+            logSecurityException('Authentication', e);
+            return false;
+        }
+    }
+
+    // Authorization Layer
+    public static Boolean authorizeAccess(String userId, String resource, String action) {
+        try {
+            // Check user permissions
+            if (!hasUserPermission(userId, resource, action)) {
+                logUnauthorizedAccess(userId, resource, action);
+                return false;
+            }
+
+            // Check role-based access
+            if (!hasRoleAccess(userId, resource, action)) {
+                logUnauthorizedAccess(userId, resource, action);
+                return false;
+            }
+
+            // Check time-based access
+            if (!isWithinAllowedTime(userId)) {
+                logUnauthorizedAccess(userId, resource, action);
+                return false;
+            }
+
+            // Check IP restrictions
+            if (!isFromAllowedIP(userId)) {
+                logUnauthorizedAccess(userId, resource, action);
+                return false;
+            }
+
+            logAuthorizedAccess(userId, resource, action);
+            return true;
+
+        } catch (Exception e) {
+            logSecurityException('Authorization', e);
+            return false;
+        }
+    }
+
+    // Data Access Control
+    public static List<SObject> getSecureRecords(String objectType, String userId, Map<String, Object> filters) {
+        try {
+            // Build secure query with sharing rules
+            String query = buildSecureQuery(objectType, userId, filters);
+
+            // Execute with security context
+            List<SObject> records = Database.query(query);
+
+            // Apply field-level security
+            records = applyFieldLevelSecurity(records, userId);
+
+            // Log data access
+            logDataAccess(userId, objectType, records.size());
+
+            return records;
+
+        } catch (Exception e) {
+            logSecurityException('DataAccess', e);
+            return new List<SObject>();
+        }
+    }
+
+    private static String buildSecureQuery(String objectType, String userId, Map<String, Object> filters) {
+        String query = 'SELECT Id FROM ' + objectType;
+
+        // Add sharing context
+        query += ' WITH SECURITY_ENFORCED';
+
+        // Add user-specific filters
+        if (filters != null && !filters.isEmpty()) {
+            List<String> conditions = new List<String>();
+
+            for (String field : filters.keySet()) {
+                Object value = filters.get(field);
+                if (value instanceof String) {
+                    conditions.add(field + ' = \'' + String.escapeSingleQuotes((String)value) + '\'');
+                } else if (value instanceof Id) {
+                    conditions.add(field + ' = \'' + value + '\'');
+                }
+            }
+
+            if (!conditions.isEmpty()) {
+                query += ' WHERE ' + String.join(conditions, ' AND ');
+            }
+        }
+
+        return query;
+    }
+
+    private static List<SObject> applyFieldLevelSecurity(List<SObject> records, String userId) {
+        // Get user's field permissions
+        Map<String, Boolean> fieldPermissions = getUserFieldPermissions(userId);
+
+        for (SObject record : records) {
+            Map<String, Object> populatedFields = record.getPopulatedFieldsAsMap();
+
+            for (String fieldName : populatedFields.keySet()) {
+                if (!fieldPermissions.get(fieldName)) {
+                    // Remove field if user doesn't have access
+                    record.put(fieldName, null);
+                }
+            }
+        }
+
+        return records;
+    }
+
+    // Encryption Services
+    public static String encryptSensitiveData(String data, String encryptionKey) {
+        try {
+            Blob dataBlob = Blob.valueOf(data);
+            Blob keyBlob = Blob.valueOf(encryptionKey);
+
+            // Use AES encryption
+            Blob encryptedData = Crypto.encrypt('AES256', keyBlob, dataBlob);
+
+            return EncodingUtil.base64Encode(encryptedData);
+
+        } catch (Exception e) {
+            logSecurityException('Encryption', e);
+            throw new SecurityException('Encryption failed');
+        }
+    }
+
+    public static String decryptSensitiveData(String encryptedData, String encryptionKey) {
+        try {
+            Blob encryptedBlob = EncodingUtil.base64Decode(encryptedData);
+            Blob keyBlob = Blob.valueOf(encryptionKey);
+
+            // Decrypt using AES
+            Blob decryptedData = Crypto.decrypt('AES256', keyBlob, encryptedBlob);
+
+            return decryptedData.toString();
+
+        } catch (Exception e) {
+            logSecurityException('Decryption', e);
+            throw new SecurityException('Decryption failed');
+        }
+    }
+
+    public class SecurityException extends Exception {}
+}
+\`\`\`
+
+### 2. **Compliance Framework Implementation**
+
+\`\`\`apex
+public class ComplianceFrameworkService {
+
+    // GDPR Compliance
+    public static void handleDataSubjectRequest(String requestType, Id contactId) {
+        switch on requestType.toUpperCase() {
+            when 'ACCESS' {
+                generateDataAccessReport(contactId);
+            }
+            when 'RECTIFICATION' {
+                initiateDataCorrectionProcess(contactId);
+            }
+            when 'ERASURE' {
+                processRightToBeForgotten(contactId);
+            }
+            when 'PORTABILITY' {
+                generateDataPortabilityExport(contactId);
+            }
+            when 'RESTRICTION' {
+                restrictDataProcessing(contactId);
+            }
+            when 'OBJECTION' {
+                processDataProcessingObjection(contactId);
+            }
+        }
+
+        // Log compliance activity
+        logComplianceActivity(requestType, contactId);
+    }
+
+    private static void generateDataAccessReport(Id contactId) {
+        // Collect all personal data for the contact
+        Contact contact = [
+            SELECT Id, Name, Email, Phone, Birthdate, Description,
+                   Account.Name, Account.Industry
+            FROM Contact
+            WHERE Id = :contactId
+        ];
+
+        List<Case> cases = [
+            SELECT Id, Subject, Description, CreatedDate, Status
+            FROM Case
+            WHERE ContactId = :contactId
+        ];
+
+        List<Opportunity> opportunities = [
+            SELECT Id, Name, Amount, StageName, CloseDate
+            FROM Opportunity
+            WHERE ContactId__c = :contactId
+        ];
+
+        // Generate comprehensive data report
+        Data_Access_Report__c report = new Data_Access_Report__c(
+            Contact_Id__c = contactId,
+            Request_Type__c = 'Access',
+            Generated_Date__c = System.now(),
+            Contact_Data__c = JSON.serialize(contact),
+            Related_Cases__c = JSON.serialize(cases),
+            Related_Opportunities__c = JSON.serialize(opportunities),
+            Status__c = 'Generated'
+        );
+
+        insert report;
+    }
+
+    private static void processRightToBeForgotten(Id contactId) {
+        // Check legal basis for retention
+        if (hasLegalRetentionRequirement(contactId)) {
+            throw new ComplianceException('Data cannot be deleted due to legal retention requirements');
+        }
+
+        Contact contact = [SELECT Id FROM Contact WHERE Id = :contactId];
+
+        // Anonymize personal data
+        contact.FirstName = 'DELETED';
+        contact.LastName = 'USER';
+        contact.Email = 'deleted@privacy.invalid';
+        contact.Phone = null;
+        contact.Birthdate = null;
+        contact.Description = 'Data deleted per GDPR request';
+        contact.Data_Deletion_Date__c = System.now();
+        contact.Data_Deleted__c = true;
+
+        update contact;
+
+        // Delete related personal data
+        deleteRelatedPersonalData(contactId);
+
+        // Create audit record
+        Privacy_Deletion_Log__c deletionLog = new Privacy_Deletion_Log__c(
+            Original_Contact_Id__c = contactId,
+            Deletion_Date__c = System.now(),
+            Deletion_Reason__c = 'GDPR Right to be Forgotten',
+            Legal_Basis_Checked__c = true
+        );
+
+        insert deletionLog;
+    }
+
+    // SOX Compliance for Financial Data
+    public static void enforceSOXControls(String transactionType, Decimal amount, Id userId) {
+        SOX_Control_Setting__mdt controlSetting = getSOXControlSetting(transactionType);
+
+        if (controlSetting == null) {
+            throw new ComplianceException('No SOX controls defined for transaction type: ' + transactionType);
+        }
+
+        // Check monetary thresholds
+        if (amount > controlSetting.Approval_Threshold__c) {
+            if (!hasManagerApproval(userId, amount)) {
+                throw new ComplianceException('Manager approval required for amounts over ' + controlSetting.Approval_Threshold__c);
+            }
+        }
+
+        // Check segregation of duties
+        if (controlSetting.Requires_Dual_Approval__c && !hasDualApproval(userId, transactionType)) {
+            throw new ComplianceException('Dual approval required for transaction type: ' + transactionType);
+        }
+
+        // Log SOX compliance check
+        SOX_Compliance_Log__c complianceLog = new SOX_Compliance_Log__c(
+            Transaction_Type__c = transactionType,
+            Amount__c = amount,
+            User_Id__c = userId,
+            Compliance_Check_Date__c = System.now(),
+            Controls_Applied__c = JSON.serialize(controlSetting),
+            Status__c = 'Compliant'
+        );
+
+        insert complianceLog;
+    }
+
+    // HIPAA Compliance for Healthcare Data
+    public static void enforceHIPAAControls(Id patientId, String accessReason, Id accessingUserId) {
+        // Verify minimum necessary access
+        if (!isMinimumNecessaryAccess(patientId, accessReason, accessingUserId)) {
+            throw new ComplianceException('Access denied: Does not meet minimum necessary standard');
+        }
+
+        // Check authorized purpose
+        if (!isAuthorizedPurpose(accessReason)) {
+            throw new ComplianceException('Access denied: Unauthorized purpose');
+        }
+
+        // Log HIPAA access
+        HIPAA_Access_Log__c accessLog = new HIPAA_Access_Log__c(
+            Patient_Id__c = patientId,
+            Accessing_User_Id__c = accessingUserId,
+            Access_Date__c = System.now(),
+            Access_Reason__c = accessReason,
+            Access_Type__c = 'Electronic',
+            Compliance_Status__c = 'Authorized'
+        );
+
+        insert accessLog;
+    }
+
+    public class ComplianceException extends Exception {}
+}
+\`\`\`
+
+### 3. **Security Monitoring & Incident Response**
+
+\`\`\`apex
+public class SecurityMonitoringService {
+
+    public static void detectSecurityAnomalies() {
+        // Monitor unusual login patterns
+        detectUnusualLoginPatterns();
+
+        // Monitor data access patterns
+        detectUnusualDataAccess();
+
+        // Monitor privilege escalations
+        detectPrivilegeEscalations();
+
+        // Monitor bulk data operations
+        detectBulkDataOperations();
+    }
+
+    private static void detectUnusualLoginPatterns() {
+        List<LoginHistory> recentLogins = [
+            SELECT Id, UserId, LoginTime, SourceIp, Status,
+                   Browser, Platform, LoginGeoId
+            FROM LoginHistory
+            WHERE LoginTime >= :System.now().addHours(-24)
+            ORDER BY LoginTime DESC
+        ];
+
+        Map<Id, List<LoginHistory>> loginsByUser = groupLoginsByUser(recentLogins);
+
+        for (Id userId : loginsByUser.keySet()) {
+            List<LoginHistory> userLogins = loginsByUser.get(userId);
+
+            // Check for logins from multiple countries
+            Set<String> countries = getLoginCountries(userLogins);
+            if (countries.size() > 2) {
+                createSecurityAlert('Multiple Geographic Locations', userId,
+                    'User logged in from ' + countries.size() + ' different countries in 24 hours');
+            }
+
+            // Check for unusual login times
+            if (hasUnusualLoginTimes(userLogins, userId)) {
+                createSecurityAlert('Unusual Login Time', userId,
+                    'User logged in outside normal business hours');
+            }
+
+            // Check for failed login attempts
+            Integer failedAttempts = countFailedLogins(userLogins);
+            if (failedAttempts > 5) {
+                createSecurityAlert('Multiple Failed Logins', userId,
+                    failedAttempts + ' failed login attempts detected');
+            }
+        }
+    }
+
+    private static void detectUnusualDataAccess() {
+        List<Data_Access_Log__c> recentAccess = [
+            SELECT Id, User_Id__c, Object_Type__c, Record_Count__c,
+                   Access_Date__c, Access_Type__c
+            FROM Data_Access_Log__c
+            WHERE Access_Date__c >= :System.now().addHours(-24)
+        ];
+
+        for (Data_Access_Log__c access : recentAccess) {
+            // Check for unusual volume of data access
+            if (access.Record_Count__c > 1000) {
+                createSecurityAlert('High Volume Data Access', access.User_Id__c,
+                    'User accessed ' + access.Record_Count__c + ' ' + access.Object_Type__c + ' records');
+            }
+
+            // Check for access to sensitive objects outside business hours
+            if (isSensitiveObject(access.Object_Type__c) && isOutsideBusinessHours(access.Access_Date__c)) {
+                createSecurityAlert('Sensitive Data Access Outside Hours', access.User_Id__c,
+                    'Access to sensitive data outside business hours');
+            }
+        }
+    }
+
+    private static void createSecurityAlert(String alertType, Id userId, String description) {
+        Security_Alert__c alert = new Security_Alert__c(
+            Alert_Type__c = alertType,
+            User_Id__c = userId,
+            Description__c = description,
+            Alert_Date__c = System.now(),
+            Status__c = 'Open',
+            Severity__c = determineSeverity(alertType)
+        );
+
+        insert alert;
+
+        // Notify security team for high severity alerts
+        if (alert.Severity__c == 'High' || alert.Severity__c == 'Critical') {
+            notifySecurityTeam(alert);
+        }
+    }
+
+    private static String determineSeverity(String alertType) {
+        Map<String, String> severityMap = new Map<String, String>{
+            'Multiple Geographic Locations' => 'High',
+            'Multiple Failed Logins' => 'Medium',
+            'High Volume Data Access' => 'High',
+            'Sensitive Data Access Outside Hours' => 'High',
+            'Privilege Escalation' => 'Critical'
+        };
+
+        return severityMap.get(alertType) != null ? severityMap.get(alertType) : 'Low';
+    }
+
+    // Incident Response Automation
+    public static void handleSecurityIncident(Id alertId) {
+        Security_Alert__c alert = [
+            SELECT Id, Alert_Type__c, User_Id__c, Severity__c, Description__c
+            FROM Security_Alert__c
+            WHERE Id = :alertId
+        ];
+
+        switch on alert.Alert_Type__c {
+            when 'Multiple Failed Logins' {
+                // Temporarily lock user account
+                temporarilyLockUser(alert.User_Id__c);
+            }
+            when 'High Volume Data Access' {
+                // Require additional verification for data access
+                requireAdditionalVerification(alert.User_Id__c);
+            }
+            when 'Privilege Escalation' {
+                // Immediately suspend user and notify security team
+                suspendUser(alert.User_Id__c);
+                notifySecurityTeam(alert);
+            }
+        }
+
+        // Create incident record
+        Security_Incident__c incident = new Security_Incident__c(
+            Alert_Id__c = alertId,
+            Incident_Type__c = alert.Alert_Type__c,
+            Affected_User__c = alert.User_Id__c,
+            Severity__c = alert.Severity__c,
+            Status__c = 'Investigating',
+            Incident_Date__c = System.now(),
+            Description__c = alert.Description__c
+        );
+
+        insert incident;
+    }
+}
+\`\`\`
+
+**Master these security patterns and protect enterprise data like a fortress! 🏰**`
+            }
+          }
+        ],
+        quiz: {
+          id: 'security-compliance-quiz',
+          title: 'Security & Compliance Mastery Quiz',
+          questions: [
+            {
+              id: 'q1',
+              question: 'What is the key principle behind the "minimum necessary" standard in HIPAA?',
+              options: [
+                'Using the simplest security measures',
+                'Accessing only the minimum data required for the specific purpose',
+                'Storing data for the minimum required time',
+                'Using the minimum number of users'
+              ],
+              correctAnswer: 'Accessing only the minimum data required for the specific purpose',
+              explanation: 'The minimum necessary standard requires that access to protected health information be limited to the minimum amount necessary to accomplish the intended purpose.',
+              points: 30,
+              difficulty: 'hard',
+              category: 'compliance'
+            },
+            {
+              id: 'q2',
+              question: 'In multi-layer security architecture, what is the primary purpose of the authorization layer?',
+              options: [
+                'Verifying user identity',
+                'Encrypting data transmission',
+                'Determining what authenticated users can access',
+                'Monitoring user behavior'
+              ],
+              correctAnswer: 'Determining what authenticated users can access',
+              explanation: 'The authorization layer determines what resources and actions an authenticated user is permitted to access based on their roles and permissions.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'security'
+            }
+          ],
+          passingScore: 85,
+          attempts: 0,
+          maxAttempts: 3
+        }
+      },
+      {
+        id: 'enterprise-governance',
+        title: 'Enterprise Governance & Strategy',
+        description: 'Lead enterprise Salesforce strategy, governance, and digital transformation',
+        duration: '4 weeks',
+        completed: false,
+        locked: true,
+        order: 6,
+        lessons: [
+          {
+            id: 'governance-framework',
+            title: 'Enterprise Governance Framework Design',
+            type: 'content',
+            duration: '55 min',
+            completed: false,
+            points: 550,
+            order: 1,
+            content: {
+              text: `# Enterprise Governance Mastery 🏛️
+
+## Strategic Governance Framework
+
+### 1. **Center of Excellence (CoE) Design**
+
+\`\`\`apex
+public class CenterOfExcellenceService {
+
+    public static void establishGovernanceFramework() {
+        // Initialize governance structure
+        createGovernanceCommittees();
+        defineArchitectureStandards();
+        establishChangeManagementProcess();
+        implementComplianceFramework();
+    }
+
+    private static void createGovernanceCommittees() {
+        List<Governance_Committee__c> committees = new List<Governance_Committee__c>{
+            new Governance_Committee__c(
+                Name = 'Architecture Review Board',
+                Purpose__c = 'Review and approve major architectural decisions',
+                Meeting_Frequency__c = 'Bi-weekly',
+                Decision_Authority__c = 'Technical Architecture',
+                Chair_Role__c = 'Chief Architect',
+                Required_Attendees__c = 'Solution Architects, Lead Developers, Security Lead'
+            ),
+            new Governance_Committee__c(
+                Name = 'Change Advisory Board',
+                Purpose__c = 'Approve and prioritize system changes',
+                Meeting_Frequency__c = 'Weekly',
+                Decision_Authority__c = 'Change Management',
+                Chair_Role__c = 'Change Manager',
+                Required_Attendees__c = 'Business Stakeholders, Technical Leads, QA Lead'
+            ),
+            new Governance_Committee__c(
+                Name = 'Data Governance Council',
+                Purpose__c = 'Oversee data quality, security, and compliance',
+                Meeting_Frequency__c = 'Monthly',
+                Decision_Authority__c = 'Data Strategy',
+                Chair_Role__c = 'Chief Data Officer',
+                Required_Attendees__c = 'Data Architects, Privacy Officer, Compliance Lead'
+            )
+        };
+
+        insert committees;
+    }
+
+    private static void defineArchitectureStandards() {
+        List<Architecture_Standard__c> standards = new List<Architecture_Standard__c>{
+            new Architecture_Standard__c(
+                Name = 'API Design Standard',
+                Category__c = 'Integration',
+                Standard_Type__c = 'Technical',
+                Description__c = 'RESTful API design principles and conventions',
+                Version__c = '1.0',
+                Mandatory__c = true,
+                Review_Date__c = System.today().addMonths(6)
+            ),
+            new Architecture_Standard__c(
+                Name = 'Security Framework',
+                Category__c = 'Security',
+                Standard_Type__c = 'Technical',
+                Description__c = 'Enterprise security architecture requirements',
+                Version__c = '2.1',
+                Mandatory__c = true,
+                Review_Date__c = System.today().addMonths(3)
+            ),
+            new Architecture_Standard__c(
+                Name = 'Data Modeling Guidelines',
+                Category__c = 'Data',
+                Standard_Type__c = 'Technical',
+                Description__c = 'Object and field naming conventions, relationship patterns',
+                Version__c = '1.5',
+                Mandatory__c = true,
+                Review_Date__c = System.today().addMonths(12)
+            )
+        };
+
+        insert standards;
+    }
+
+    public static void assessArchitectureCompliance(String projectId) {
+        List<Compliance_Assessment__c> assessments = new List<Compliance_Assessment__c>();
+
+        List<Architecture_Standard__c> mandatoryStandards = [
+            SELECT Id, Name, Category__c, Description__c
+            FROM Architecture_Standard__c
+            WHERE Mandatory__c = true
+        ];
+
+        for (Architecture_Standard__c standard : mandatoryStandards) {
+            Compliance_Assessment__c assessment = new Compliance_Assessment__c(
+                Project_Id__c = projectId,
+                Standard_Id__c = standard.Id,
+                Assessment_Date__c = System.now(),
+                Status__c = 'Pending Review',
+                Compliance_Score__c = 0
+            );
+            assessments.add(assessment);
+        }
+
+        insert assessments;
+
+        // Trigger automated compliance checks
+        automateComplianceChecks(projectId, assessments);
+    }
+
+    private static void automateComplianceChecks(String projectId, List<Compliance_Assessment__c> assessments) {
+        for (Compliance_Assessment__c assessment : assessments) {
+            // Run automated checks based on standard type
+            Decimal complianceScore = performAutomatedCheck(assessment.Standard_Id__c, projectId);
+
+            assessment.Compliance_Score__c = complianceScore;
+            assessment.Status__c = complianceScore >= 80 ? 'Compliant' : 'Non-Compliant';
+            assessment.Last_Check_Date__c = System.now();
+        }
+
+        update assessments;
+    }
+
+    private static Decimal performAutomatedCheck(Id standardId, String projectId) {
+        // Implement automated compliance checking logic
+        // This would integrate with various tools and scanning systems
+        return 85.0; // Placeholder score
+    }
+}
+\`\`\`
+
+### 2. **Enterprise Strategy Management**
+
+\`\`\`apex
+public class EnterpriseStrategyService {
+
+    public static void developDigitalTransformationRoadmap() {
+        // Define strategic initiatives
+        List<Strategic_Initiative__c> initiatives = createStrategicInitiatives();
+
+        // Create capability maturity assessments
+        assessCurrentCapabilityMaturity();
+
+        // Design target operating model
+        designTargetOperatingModel();
+
+        // Create transformation roadmap
+        createTransformationRoadmap(initiatives);
+    }
+
+    private static List<Strategic_Initiative__c> createStrategicInitiatives() {
+        List<Strategic_Initiative__c> initiatives = new List<Strategic_Initiative__c>{
+            new Strategic_Initiative__c(
+                Name = 'Customer 360 Platform',
+                Strategic_Pillar__c = 'Customer Experience',
+                Business_Value__c = 'Unified customer view across all touchpoints',
+                Target_Completion__c = System.today().addMonths(18),
+                Investment_Required__c = 2500000,
+                ROI_Projection__c = 350,
+                Risk_Level__c = 'Medium',
+                Priority__c = 'High'
+            ),
+            new Strategic_Initiative__c(
+                Name = 'AI-Powered Analytics',
+                Strategic_Pillar__c = 'Data & Analytics',
+                Business_Value__c = 'Predictive insights for better decision making',
+                Target_Completion__c = System.today().addMonths(24),
+                Investment_Required__c = 1800000,
+                ROI_Projection__c = 280,
+                Risk_Level__c = 'High',
+                Priority__c = 'High'
+            ),
+            new Strategic_Initiative__c(
+                Name = 'Process Automation Suite',
+                Strategic_Pillar__c = 'Operational Excellence',
+                Business_Value__c = 'Automated workflows reducing manual effort by 60%',
+                Target_Completion__c = System.today().addMonths(12),
+                Investment_Required__c = 1200000,
+                ROI_Projection__c = 420,
+                Risk_Level__c = 'Low',
+                Priority__c = 'Medium'
+            )
+        };
+
+        insert initiatives;
+        return initiatives;
+    }
+
+    private static void assessCurrentCapabilityMaturity() {
+        List<Capability_Assessment__c> assessments = new List<Capability_Assessment__c>{
+            new Capability_Assessment__c(
+                Capability_Area__c = 'Data Management',
+                Current_Maturity_Level__c = 2,
+                Target_Maturity_Level__c = 4,
+                Assessment_Date__c = System.now(),
+                Key_Gaps__c = 'Data governance, Master data management, Real-time analytics',
+                Improvement_Priority__c = 'High'
+            ),
+            new Capability_Assessment__c(
+                Capability_Area__c = 'Integration Architecture',
+                Current_Maturity_Level__c = 3,
+                Target_Maturity_Level__c = 5,
+                Assessment_Date__c = System.now(),
+                Key_Gaps__c = 'Event-driven architecture, API management platform',
+                Improvement_Priority__c = 'Medium'
+            ),
+            new Capability_Assessment__c(
+                Capability_Area__c = 'Security & Compliance',
+                Current_Maturity_Level__c = 4,
+                Target_Maturity_Level__c = 5,
+                Assessment_Date__c = System.now(),
+                Key_Gaps__c = 'Zero-trust architecture, Advanced threat detection',
+                Improvement_Priority__c = 'High'
+            )
+        };
+
+        insert assessments;
+    }
+
+    public static void trackStrategicKPIs() {
+        List<Strategic_KPI__c> kpis = new List<Strategic_KPI__c>{
+            new Strategic_KPI__c(
+                Name = 'Digital Adoption Rate',
+                Category__c = 'Digital Transformation',
+                Target_Value__c = 90,
+                Current_Value__c = calculateDigitalAdoptionRate(),
+                Measurement_Unit__c = 'Percentage',
+                Measurement_Frequency__c = 'Monthly',
+                Owner__c = 'Chief Digital Officer'
+            ),
+            new Strategic_KPI__c(
+                Name = 'Customer Satisfaction Score',
+                Category__c = 'Customer Experience',
+                Target_Value__c = 4.5,
+                Current_Value__c = getCurrentCustomerSatisfaction(),
+                Measurement_Unit__c = 'Score (1-5)',
+                Measurement_Frequency__c = 'Quarterly',
+                Owner__c = 'Chief Customer Officer'
+            ),
+            new Strategic_KPI__c(
+                Name = 'Process Automation Coverage',
+                Category__c = 'Operational Excellence',
+                Target_Value__c = 75,
+                Current_Value__c = calculateAutomationCoverage(),
+                Measurement_Unit__c = 'Percentage',
+                Measurement_Frequency__c = 'Monthly',
+                Owner__c = 'Chief Operating Officer'
+            )
+        };
+
+        insert kpis;
+
+        // Generate KPI dashboard
+        generateKPIDashboard(kpis);
+    }
+
+    private static Decimal calculateDigitalAdoptionRate() {
+        // Complex calculation based on various digital touchpoints
+        return 72.5; // Placeholder
+    }
+
+    private static Decimal getCurrentCustomerSatisfaction() {
+        // Aggregate customer satisfaction from various sources
+        return 4.2; // Placeholder
+    }
+
+    private static Decimal calculateAutomationCoverage() {
+        // Calculate percentage of processes that are automated
+        return 58.3; // Placeholder
+    }
+}
+\`\`\`
+
+### 3. **Technology Portfolio Management**
+
+\`\`\`apex
+public class TechnologyPortfolioService {
+
+    public static void manageTechnologyPortfolio() {
+        // Assess current technology landscape
+        assessTechnologyLandscape();
+
+        // Identify technology debt and risks
+        identifyTechnicalDebt();
+
+        // Plan technology rationalization
+        planTechnologyRationalization();
+
+        // Create technology roadmap
+        createTechnologyRoadmap();
+    }
+
+    private static void assessTechnologyLandscape() {
+        List<Technology_Asset__c> assets = new List<Technology_Asset__c>{
+            new Technology_Asset__c(
+                Name = 'Salesforce CRM',
+                Category__c = 'CRM Platform',
+                Vendor__c = 'Salesforce',
+                Version__c = 'Winter \'25',
+                Business_Criticality__c = 'Critical',
+                Technical_Health__c = 'Good',
+                License_Cost_Annual__c = 480000,
+                End_Of_Life_Date__c = null,
+                Risk_Level__c = 'Low'
+            ),
+            new Technology_Asset__c(
+                Name = 'Legacy ERP System',
+                Category__c = 'ERP',
+                Vendor__c = 'Oracle',
+                Version__c = '11.5.10',
+                Business_Criticality__c = 'Critical',
+                Technical_Health__c = 'Poor',
+                License_Cost_Annual__c = 250000,
+                End_Of_Life_Date__c = System.today().addMonths(18),
+                Risk_Level__c = 'High'
+            ),
+            new Technology_Asset__c(
+                Name = 'Business Intelligence Tool',
+                Category__c = 'Analytics',
+                Vendor__c = 'Tableau',
+                Version__c = '2023.3',
+                Business_Criticality__c = 'High',
+                Technical_Health__c = 'Good',
+                License_Cost_Annual__c = 180000,
+                End_Of_Life_Date__c = null,
+                Risk_Level__c = 'Low'
+            )
+        };
+
+        insert assets;
+
+        // Generate portfolio health report
+        generatePortfolioHealthReport(assets);
+    }
+
+    private static void identifyTechnicalDebt() {
+        List<Technical_Debt__c> debtItems = new List<Technical_Debt__c>{
+            new Technical_Debt__c(
+                Title = 'Legacy Integration Layer',
+                Category__c = 'Architecture',
+                Description__c = 'Point-to-point integrations creating maintenance burden',
+                Business_Impact__c = 'Slow development cycles, high maintenance cost',
+                Technical_Impact__c = 'Tight coupling, difficult to scale',
+                Effort_To_Resolve__c = 'High',
+                Priority__c = 'High',
+                Estimated_Cost__c = 850000
+            ),
+            new Technical_Debt__c(
+                Title = 'Inconsistent Data Models',
+                Category__c = 'Data',
+                Description__c = 'Multiple systems with different customer data models',
+                Business_Impact__c = 'Inconsistent customer experience, reporting challenges',
+                Technical_Impact__c = 'Complex data transformation, quality issues',
+                Effort_To_Resolve__c = 'Medium',
+                Priority__c = 'High',
+                Estimated_Cost__c = 420000
+            ),
+            new Technical_Debt__c(
+                Title = 'Manual Testing Processes',
+                Category__c = 'Quality Assurance',
+                Description__c = 'Limited test automation increasing release cycle time',
+                Business_Impact__c = 'Slow time to market, quality risks',
+                Technical_Impact__c = 'Resource intensive, error prone',
+                Effort_To_Resolve__c = 'Medium',
+                Priority__c = 'Medium',
+                Estimated_Cost__c = 180000
+            )
+        };
+
+        insert debtItems;
+
+        // Prioritize debt items based on business value and risk
+        prioritizeTechnicalDebt(debtItems);
+    }
+
+    private static void planTechnologyRationalization() {
+        List<Rationalization_Plan__c> plans = new List<Rationalization_Plan__c>{
+            new Rationalization_Plan__c(
+                Technology_Asset__c = 'Legacy ERP System',
+                Action__c = 'Replace',
+                Target_Technology__c = 'Salesforce CPQ + NetSuite',
+                Timeline__c = '18 months',
+                Investment_Required__c = 1200000,
+                Risk_Mitigation__c = 'Phased migration with parallel run period',
+                Business_Justification__c = 'End of life support, integration complexity'
+            ),
+            new Rationalization_Plan__c(
+                Technology_Asset__c = 'Multiple Reporting Tools',
+                Action__c = 'Consolidate',
+                Target_Technology__c = 'Salesforce Einstein Analytics',
+                Timeline__c = '12 months',
+                Investment_Required__c = 350000,
+                Risk_Mitigation__c = 'User training program, gradual transition',
+                Business_Justification__c = 'Reduce licensing costs, improve data consistency'
+            )
+        };
+
+        insert plans;
+    }
+
+    public static void generateArchitectureDecisionRecord(String decisionTitle, String context, String decision, String consequences) {
+        Architecture_Decision__c adr = new Architecture_Decision__c(
+            Title__c = decisionTitle,
+            Decision_Date__c = System.now(),
+            Status__c = 'Decided',
+            Context__c = context,
+            Decision__c = decision,
+            Consequences__c = consequences,
+            Decision_Maker__c = UserInfo.getUserId(),
+            Review_Date__c = System.today().addMonths(6)
+        );
+
+        insert adr;
+
+        // Notify stakeholders
+        notifyStakeholders(adr);
+    }
+
+    private static void notifyStakeholders(Architecture_Decision__c adr) {
+        // Implementation for stakeholder notification
+        System.debug('Architecture decision recorded: ' + adr.Title__c);
+    }
+}
+\`\`\`
+
+### 4. **Enterprise Risk Management**
+
+\`\`\`apex
+public class EnterpriseRiskService {
+
+    public static void conductRiskAssessment() {
+        // Identify technology risks
+        identifyTechnologyRisks();
+
+        // Assess business continuity risks
+        assessBusinessContinuityRisks();
+
+        // Evaluate compliance risks
+        evaluateComplianceRisks();
+
+        // Create risk mitigation plans
+        createRiskMitigationPlans();
+    }
+
+    private static void identifyTechnologyRisks() {
+        List<Enterprise_Risk__c> techRisks = new List<Enterprise_Risk__c>{
+            new Enterprise_Risk__c(
+                Risk_Title__c = 'Single Point of Failure in Integration Layer',
+                Category__c = 'Technology',
+                Risk_Type__c = 'Operational',
+                Probability__c = 'Medium',
+                Impact__c = 'High',
+                Risk_Level__c = 'High',
+                Description__c = 'Critical business processes depend on single integration platform',
+                Potential_Impact__c = 'Complete business disruption, revenue loss',
+                Current_Controls__c = 'Basic monitoring, manual backup procedures'
+            ),
+            new Enterprise_Risk__c(
+                Risk_Title__c = 'Cybersecurity Threat to Customer Data',
+                Category__c = 'Security',
+                Risk_Type__c = 'Strategic',
+                Probability__c = 'Medium',
+                Impact__c = 'Critical',
+                Risk_Level__c = 'Critical',
+                Description__c = 'Advanced persistent threats targeting customer database',
+                Potential_Impact__c = 'Data breach, regulatory fines, reputation damage',
+                Current_Controls__c = 'Firewall, basic intrusion detection, access controls'
+            ),
+            new Enterprise_Risk__c(
+                Risk_Title__c = 'Skills Gap in Emerging Technologies',
+                Category__c = 'Human Resources',
+                Risk_Type__c = 'Strategic',
+                Probability__c = 'High',
+                Impact__c = 'Medium',
+                Risk_Level__c = 'Medium',
+                Description__c = 'Lack of expertise in AI, machine learning, blockchain',
+                Potential_Impact__c = 'Competitive disadvantage, delayed innovation',
+                Current_Controls__c = 'Training programs, external consultants'
+            )
+        };
+
+        insert techRisks;
+
+        // Calculate risk scores
+        calculateRiskScores(techRisks);
+    }
+
+    private static void calculateRiskScores(List<Enterprise_Risk__c> risks) {
+        Map<String, Integer> probabilityScores = new Map<String, Integer>{
+            'Low' => 1, 'Medium' => 2, 'High' => 3, 'Critical' => 4
+        };
+
+        Map<String, Integer> impactScores = new Map<String, Integer>{
+            'Low' => 1, 'Medium' => 2, 'High' => 3, 'Critical' => 4
+        };
+
+        for (Enterprise_Risk__c risk : risks) {
+            Integer probScore = probabilityScores.get(risk.Probability__c);
+            Integer impactScore = impactScores.get(risk.Impact__c);
+
+            risk.Risk_Score__c = probScore * impactScore;
+
+            // Determine risk level based on score
+            if (risk.Risk_Score__c >= 12) {
+                risk.Risk_Level__c = 'Critical';
+            } else if (risk.Risk_Score__c >= 6) {
+                risk.Risk_Level__c = 'High';
+            } else if (risk.Risk_Score__c >= 3) {
+                risk.Risk_Level__c = 'Medium';
+            } else {
+                risk.Risk_Level__c = 'Low';
+            }
+        }
+
+        update risks;
+    }
+
+    public static void createBusinessContinuityPlan() {
+        List<Business_Continuity_Plan__c> plans = new List<Business_Continuity_Plan__c>{
+            new Business_Continuity_Plan__c(
+                Business_Process__c = 'Customer Order Processing',
+                Criticality__c = 'Critical',
+                RTO_Hours__c = 4,
+                RPO_Hours__c = 1,
+                Primary_Dependencies__c = 'Salesforce CRM, Payment Gateway, Inventory System',
+                Backup_Procedures__c = 'Manual order processing, offline payment capture',
+                Recovery_Procedures__c = 'Restore from backup, validate data integrity, resume automated processing',
+                Test_Frequency__c = 'Quarterly',
+                Last_Test_Date__c = System.today().addDays(-45)
+            ),
+            new Business_Continuity_Plan__c(
+                Business_Process__c = 'Customer Support',
+                Criticality__c = 'High',
+                RTO_Hours__c = 8,
+                RPO_Hours__c = 4,
+                Primary_Dependencies__c = 'Salesforce Service Cloud, Knowledge Base, Phone System',
+                Backup_Procedures__c = 'Email support, escalation to managers',
+                Recovery_Procedures__c = 'Restore service cloud access, update knowledge base, resume normal operations',
+                Test_Frequency__c = 'Semi-Annual',
+                Last_Test_Date__c = System.today().addDays(-90)
+            )
+        };
+
+        insert plans;
+
+        // Schedule regular testing
+        scheduleBusinessContinuityTests(plans);
+    }
+}
+\`\`\`
+
+**Master these governance patterns and lead enterprise transformation at the highest level! 👑**`
+            }
+          }
+        ],
+        quiz: {
+          id: 'enterprise-governance-quiz',
+          title: 'Enterprise Governance Mastery Quiz',
+          questions: [
+            {
+              id: 'q1',
+              question: 'What is the primary purpose of an Architecture Review Board in enterprise governance?',
+              options: [
+                'Managing daily technical issues',
+                'Reviewing and approving major architectural decisions',
+                'Conducting performance testing',
+                'Training development teams'
+              ],
+              correctAnswer: 'Reviewing and approving major architectural decisions',
+              explanation: 'The Architecture Review Board ensures that major technical decisions align with enterprise standards and strategic objectives.',
+              points: 30,
+              difficulty: 'medium',
+              category: 'governance'
+            },
+            {
+              id: 'q2',
+              question: 'In technology portfolio management, what is the main goal of technology rationalization?',
+              options: [
+                'Increasing the number of technologies used',
+                'Reducing costs and complexity by optimizing the technology stack',
+                'Upgrading all systems to the latest versions',
+                'Standardizing all vendors to a single provider'
+              ],
+              correctAnswer: 'Reducing costs and complexity by optimizing the technology stack',
+              explanation: 'Technology rationalization aims to optimize the portfolio by eliminating redundancies, reducing complexity, and aligning technologies with business strategy.',
+              points: 25,
+              difficulty: 'medium',
+              category: 'portfolio-management'
+            }
+          ],
+          passingScore: 90,
+          attempts: 0,
+          maxAttempts: 3
+        }
       }
     ]
   }

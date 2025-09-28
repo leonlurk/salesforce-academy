@@ -202,7 +202,7 @@ const Lesson: React.FC = () => {
                       </li>
                     ),
                     code: ({ children }) => (
-                      <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono">
+                      <code className="bg-gray-800 text-green-400 dark:bg-gray-800 dark:text-green-400 px-2 py-1 rounded text-sm font-mono border border-gray-600">
                         {children}
                       </code>
                     ),
