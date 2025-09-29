@@ -12,6 +12,7 @@ import {
   Trophy
 } from 'lucide-react';
 import type { InteractiveElement } from '../types';
+import SalesforcePlayground from './SalesforcePlayground';
 
 interface Step {
   instruction: string;
@@ -229,6 +230,42 @@ const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ exercises, onComp
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {exercise.type === 'playground' && (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                {exercise.title || 'Salesforce Playground'}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                {exercise.description || 'Practice in a simulated Salesforce environment'}
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <SalesforcePlayground
+                module={(exercise.module as 'objects' | 'fields' | 'workflows' | 'reports' | 'apex' | 'lwc' | 'integration') || 'objects'}
+                onComplete={(results) => {
+                  console.log('Playground completed:', results);
+                  setIsComplete(true);
+                  setShowFeedback(true);
+                  onComplete?.(results);
+                }}
+              />
+            </div>
+
+            {exercise.data?.objectives && (
+              <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Learning Objectives:</h4>
+                <ul className="list-disc list-inside space-y-1 text-blue-800 dark:text-blue-200">
+                  {exercise.data.objectives.map((objective: string, index: number) => (
+                    <li key={index}>{objective}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </motion.div>

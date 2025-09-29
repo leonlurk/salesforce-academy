@@ -77,10 +77,14 @@ export interface CodeExample {
 }
 
 export interface InteractiveElement {
-  type: 'drag-drop' | 'click-sequence' | 'form-builder' | 'code-editor';
+  id?: string;
+  type: 'drag-drop' | 'click-sequence' | 'form-builder' | 'code-editor' | 'playground';
+  title?: string;
+  description?: string;
+  module?: string;
   data: any;
-  validation: any;
-  feedback: string;
+  validation?: any;
+  feedback?: string;
 }
 
 export interface Quiz {

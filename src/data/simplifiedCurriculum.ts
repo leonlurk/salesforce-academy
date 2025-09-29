@@ -195,6 +195,20 @@ Let's go make some magic happen! ✨`,
                   url: 'https://www.salesforce.com/news/stories/state-of-salesforce-report/',
                   description: 'Latest trends and insights in the Salesforce ecosystem'
                 }
+              ],
+              interactive: [
+                {
+                  id: 'playground-introduction',
+                  type: 'playground',
+                  title: 'Explore the Salesforce Interface',
+                  description: 'Get hands-on experience with a simulated Salesforce environment',
+                  module: 'objects',
+                  data: {
+                    showIntro: true,
+                    allowedActions: ['view', 'navigate'],
+                    initialView: 'home'
+                  }
+                }
               ]
             }
           },
@@ -565,6 +579,21 @@ Ready to build something amazing? Let's go! 🎉`,
                   type: 'article',
                   url: 'https://help.salesforce.com/articleView?id=overview_of_custom_object_relationships.htm',
                   description: 'Deep dive into when to use each relationship type'
+                }
+              ],
+              interactive: [
+                {
+                  id: 'playground-navigation',
+                  type: 'playground',
+                  title: 'Practice Salesforce Navigation',
+                  description: 'Navigate through Accounts, Contacts, and Opportunities to master the interface',
+                  module: 'objects',
+                  data: {
+                    showNavigation: true,
+                    allowedActions: ['view', 'navigate', 'search'],
+                    initialView: 'accounts',
+                    objectives: ['Navigate to Accounts', 'Find a Contact', 'View an Opportunity']
+                  }
                 }
               ]
             }
@@ -1128,6 +1157,27 @@ You now understand advanced data relationships! Next up:
                   url: 'https://trailhead.salesforce.com/content/learn/modules/data_modeling',
                   description: 'Hands-on practice with visual data modeling'
                 }
+              ],
+              interactive: [
+                {
+                  id: 'playground-data-model',
+                  type: 'playground',
+                  title: 'Explore Data Relationships',
+                  description: 'See how Accounts, Contacts, and Opportunities are connected in real Salesforce data',
+                  module: 'objects',
+                  data: {
+                    showRelationships: true,
+                    allowedActions: ['view', 'navigate', 'create', 'edit'],
+                    initialView: 'accounts',
+                    objectives: [
+                      'Create a new Account',
+                      'Add a Contact to the Account',
+                      'Create an Opportunity for the Account',
+                      'View the relationships between records'
+                    ],
+                    enableDataModel: true
+                  }
+                }
               ]
             }
           }
@@ -1512,6 +1562,27 @@ Coming up in our next modules:
                   type: 'documentation',
                   url: 'https://help.salesforce.com/articleView?id=security_overview.htm',
                   description: 'Complete security model documentation'
+                }
+              ],
+              interactive: [
+                {
+                  id: 'playground-user-management',
+                  type: 'playground',
+                  title: 'Practice User Management & Security',
+                  description: 'Create users, assign profiles, and configure security settings in a safe environment',
+                  module: 'workflows',
+                  data: {
+                    showUserManagement: true,
+                    allowedActions: ['view', 'create', 'edit', 'configure'],
+                    initialView: 'users',
+                    objectives: [
+                      'Create a new user',
+                      'Assign a profile to the user',
+                      'Configure user settings',
+                      'Review security permissions'
+                    ],
+                    adminFeatures: true
+                  }
                 }
               ]
             }
@@ -2825,6 +2896,32 @@ The journey from admin to developer is one of the most rewarding in tech. You're
                   type: 'trailhead',
                   url: 'https://trailhead.salesforce.com/content/learn/trails/force_com_dev_beginner',
                   description: 'Hands-on Apex development practice'
+                }
+              ],
+              interactive: [
+                {
+                  id: 'playground-apex-development',
+                  type: 'playground',
+                  title: 'Practice Apex Development',
+                  description: 'Write and test Apex code in a simulated Developer Console environment',
+                  module: 'apex',
+                  data: {
+                    showDeveloperConsole: true,
+                    allowedActions: ['view', 'create', 'edit', 'execute', 'debug'],
+                    initialView: 'apex',
+                    objectives: [
+                      'Write a simple Apex class',
+                      'Execute Apex code',
+                      'View debug logs',
+                      'Test Apex functionality'
+                    ],
+                    codeExamples: [
+                      'Account creation',
+                      'SOQL queries',
+                      'DML operations',
+                      'Debug statements'
+                    ]
+                  }
                 }
               ]
             }
@@ -7781,7 +7878,33 @@ public class ERPIntegrationService {
 }
 \`\`\`
 
-**Master these integration patterns and you'll orchestrate entire enterprise ecosystems! 🎼**`
+**Master these integration patterns and you'll orchestrate entire enterprise ecosystems! 🎼**`,
+              interactive: [
+                {
+                  id: 'playground-integration-architecture',
+                  type: 'playground',
+                  title: 'Enterprise Integration & API Design',
+                  description: 'Design and test enterprise integration patterns with REST APIs and event-driven architecture',
+                  module: 'integration',
+                  data: {
+                    showIntegrationTools: true,
+                    allowedActions: ['view', 'create', 'edit', 'test', 'deploy'],
+                    initialView: 'apis',
+                    objectives: [
+                      'Design a REST API endpoint',
+                      'Configure event-driven integration',
+                      'Test API responses',
+                      'Monitor integration performance'
+                    ],
+                    enterpriseFeatures: [
+                      'API Gateway',
+                      'Event Bus',
+                      'External Services',
+                      'Named Credentials'
+                    ]
+                  }
+                }
+              ]
             }
           },
           {
