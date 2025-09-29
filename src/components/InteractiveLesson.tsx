@@ -9,7 +9,9 @@ import {
   ArrowRight,
   Clock,
   Star,
-  Trophy
+  Trophy,
+  Maximize,
+  X
 } from 'lucide-react';
 import type { InteractiveElement } from '../types';
 import SalesforcePlayground from './SalesforcePlayground';
@@ -36,6 +38,7 @@ const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ exercises, onComp
   const [showFeedback, setShowFeedback] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [isPlaygroundModalOpen, setIsPlaygroundModalOpen] = useState(false);
 
   const exercise = exercises[currentExercise];
 
@@ -244,16 +247,20 @@ const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ exercises, onComp
               </p>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <SalesforcePlayground
-                module={(exercise.module as 'objects' | 'fields' | 'workflows' | 'reports' | 'apex' | 'lwc' | 'integration') || 'objects'}
-                onComplete={(results) => {
-                  console.log('Playground completed:', results);
-                  setIsComplete(true);
-                  setShowFeedback(true);
-                  onComplete?.(results);
-                }}
-              />
+            {/* Playground Launch Button */}
+            <div className="text-center">
+              <motion.button
+                onClick={() => setIsPlaygroundModalOpen(true)}
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg transition-all duration-300 hover:shadow-xl transform hover:scale-105"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Maximize className="w-6 h-6" />
+                Launch Salesforce Playground
+              </motion.button>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Opens in fullscreen for the best experience
+              </p>
             </div>
 
             {exercise.data?.objectives && (
@@ -358,6 +365,62 @@ const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ exercises, onComp
           )}
         </div>
       </div>
+
+      {/* Fullscreen Playground Modal */}
+      <AnimatePresence>
+        {isPlaygroundModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsPlaygroundModalOpen(false);
+              }
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative w-[95vw] h-[95vh] bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    {exercise.title || 'Salesforce Playground'}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {exercise.description || 'Practice in a simulated Salesforce environment'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsPlaygroundModalOpen(false)}
+                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="h-[calc(95vh-80px)] overflow-hidden">
+                <SalesforcePlayground
+                  module={(exercise.module as 'objects' | 'fields' | 'workflows' | 'reports' | 'apex' | 'lwc' | 'integration') || 'objects'}
+                  onComplete={(results) => {
+                    console.log('Playground completed:', results);
+                    setIsComplete(true);
+                    setShowFeedback(true);
+                    setIsPlaygroundModalOpen(false);
+                    onComplete?.(results);
+                  }}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
