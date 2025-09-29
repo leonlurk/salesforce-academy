@@ -7060,9 +7060,8 @@ public class CustomerEventPublisher {
 }
 \`\`\`
 
-**Remember**: As a Technical Architect, you don't just store data—you design intelligent data ecosystems that power entire enterprises! 🏗️`
-            },
-            codeExample: {
+**Remember**: As a Technical Architect, you don't just store data—you design intelligent data ecosystems that power entire enterprises! 🏗️`,
+              codeExample: {
               title: 'Enterprise Data Model Implementation',
               language: 'apex',
               code: `// Complete Enterprise Data Architecture Example
@@ -7105,6 +7104,7 @@ public class EnterpriseDataOrchestrator {
 
     public class CustomerLifecycleException extends Exception {}
 }`
+              }
             }
           },
           {
@@ -7341,6 +7341,7 @@ public class EncryptionService {
           questions: [
             {
               id: 'q1',
+              type: 'multiple-choice',
               question: 'What is the primary benefit of implementing data lineage tracking?',
               options: [
                 'Faster query performance',
@@ -7356,6 +7357,7 @@ public class EncryptionService {
             },
             {
               id: 'q2',
+              type: 'multiple-choice',
               question: 'Which approach is most efficient for retrieving related records?',
               options: [
                 'Separate queries for each record',
@@ -8299,6 +8301,7 @@ public class DistributedTransactionManager {
           questions: [
             {
               id: 'q1',
+              type: 'multiple-choice',
               question: 'What is the primary benefit of implementing event-driven integration architecture?',
               options: [
                 'Reduced code complexity',
@@ -8314,6 +8317,7 @@ public class DistributedTransactionManager {
             },
             {
               id: 'q2',
+              type: 'multiple-choice',
               question: 'In distributed transaction management, what is the purpose of compensation operations?',
               options: [
                 'To improve performance',
@@ -8805,6 +8809,7 @@ public class PerformanceMonitor {
           questions: [
             {
               id: 'q1',
+              type: 'multiple-choice',
               question: 'What is the primary cause of the N+1 query problem?',
               options: [
                 'Using too many fields in SELECT statements',
@@ -8820,6 +8825,7 @@ public class PerformanceMonitor {
             },
             {
               id: 'q2',
+              type: 'multiple-choice',
               question: 'Which caching strategy provides the best performance for frequently accessed data?',
               options: [
                 'No caching',
@@ -9350,6 +9356,7 @@ public class SecurityMonitoringService {
           questions: [
             {
               id: 'q1',
+              type: 'multiple-choice',
               question: 'What is the key principle behind the "minimum necessary" standard in HIPAA?',
               options: [
                 'Using the simplest security measures',
@@ -9365,6 +9372,7 @@ public class SecurityMonitoringService {
             },
             {
               id: 'q2',
+              type: 'multiple-choice',
               question: 'In multi-layer security architecture, what is the primary purpose of the authorization layer?',
               options: [
                 'Verifying user identity',
@@ -9961,6 +9969,7 @@ public class EnterpriseRiskService {
           questions: [
             {
               id: 'q1',
+              type: 'multiple-choice',
               question: 'What is the primary purpose of an Architecture Review Board in enterprise governance?',
               options: [
                 'Managing daily technical issues',
@@ -9976,6 +9985,7 @@ public class EnterpriseRiskService {
             },
             {
               id: 'q2',
+              type: 'multiple-choice',
               question: 'In technology portfolio management, what is the main goal of technology rationalization?',
               options: [
                 'Increasing the number of technologies used',

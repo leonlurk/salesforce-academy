@@ -61,6 +61,11 @@ export interface LessonContent {
   interactive?: InteractiveElement[];
   quiz?: QuizQuestion[];
   resources?: Resource[];
+  codeExample?: {
+    title: string;
+    language: string;
+    code: string;
+  };
 }
 
 export interface CodeExample {

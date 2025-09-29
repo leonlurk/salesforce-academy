@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -10,24 +10,15 @@ import {
   Users,
   Target,
   Briefcase,
-  FileText,
   Plus,
   Edit,
   Save,
-  X,
   Grid3X3,
   List,
   Filter,
   Download,
-  Upload,
   MoreHorizontal,
-  ChevronDown,
-  Calendar,
-  Phone,
-  Mail,
-  Globe,
-  MapPin,
-  DollarSign
+  ChevronDown
 } from 'lucide-react';
 
 interface PlaygroundProps {
@@ -112,9 +103,9 @@ const mockData = {
   ]
 };
 
-const SalesforcePlayground: React.FC<PlaygroundProps> = ({ module, initialData, onComplete }) => {
+const SalesforcePlayground: React.FC<PlaygroundProps> = ({ onComplete }) => {
   const [currentApp, setCurrentApp] = useState('Sales');
-  const [currentObject, setCurrentObject] = useState('Account');
+  const [currentObject] = useState('Account');
   const [currentView, setCurrentView] = useState('All Accounts');
   const [isCreating, setIsCreating] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
@@ -359,7 +350,7 @@ const SalesforcePlayground: React.FC<PlaygroundProps> = ({ module, initialData, 
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-            {filteredData.map((item: any, index: number) => (
+            {filteredData.map((item: any) => (
               <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input type="checkbox" className="rounded" />
