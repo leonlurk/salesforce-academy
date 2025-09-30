@@ -407,7 +407,14 @@ const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ exercises, onComp
               {/* Modal Content */}
               <div className="h-[calc(95vh-80px)] overflow-hidden">
                 <SalesforcePlayground
-                  module={(exercise.module as 'objects' | 'fields' | 'workflows' | 'reports' | 'apex' | 'lwc' | 'integration') || 'objects'}
+                  title={exercise.title}
+                  description={exercise.description}
+                  data={{
+                    module: (exercise.module as 'objects' | 'fields' | 'workflows' | 'reports' | 'apex' | 'lwc' | 'integration') || 'objects',
+                    objectives: exercise.objectives || [],
+                    showNavigation: true,
+                    showAppLauncher: true
+                  }}
                   onComplete={(results) => {
                     console.log('Playground completed:', results);
                     setIsComplete(true);

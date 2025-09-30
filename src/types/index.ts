@@ -82,6 +82,7 @@ export interface InteractiveElement {
   title?: string;
   description?: string;
   module?: string;
+  objectives?: string[];
   data: any;
   validation?: any;
   feedback?: string;
