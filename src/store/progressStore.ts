@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface LessonProgress {
   lessonId: string;
@@ -96,7 +96,9 @@ export const useProgressStore = create<ProgressState>()(
       progress: initialProgress,
 
       completeLesson: (pathId: string, moduleId: string, lessonId: string, points: number, timeSpent?: number) => {
+        console.log('progressStore.completeLesson called with:', { pathId, moduleId, lessonId, points, timeSpent });
         set((state) => {
+          console.log('Current progress state:', state.progress);
           const newProgress = { ...state.progress };
 
           // Ensure path exists
@@ -194,6 +196,8 @@ export const useProgressStore = create<ProgressState>()(
           // Update user level based on total points
           newProgress.level = Math.floor(newProgress.totalPoints / 1000) + 1;
 
+          console.log('New progress state after update:', newProgress);
+          console.log('Saving to localStorage with key: salesforce-academy-progress');
           return { progress: newProgress };
         });
       },
@@ -303,6 +307,17 @@ export const useProgressStore = create<ProgressState>()(
     {
       name: 'salesforce-academy-progress',
       version: 1,
+      storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => {
+        console.log('Starting to rehydrate progress from localStorage');
+        return (state, error) => {
+          if (error) {
+            console.log('Error rehydrating storage:', error);
+          } else {
+            console.log('Successfully rehydrated progress:', state);
+          }
+        };
+      },
     }
   )
 );

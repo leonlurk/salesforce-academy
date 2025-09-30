@@ -62,9 +62,14 @@ const Lesson: React.FC = () => {
     );
   }
 
+  const isCompleted = pathId && moduleId && lessonId ?
+    isLessonCompleted(pathId, moduleId, lessonId) || user.completedLessons.includes(lesson.id) :
+    false;
+
   const handleCompleteLesson = () => {
     if (!isCompleted && pathId && moduleId && lessonId) {
       const timeSpent = Math.floor((new Date().getTime() - lessonStartTime.getTime()) / 1000);
+      console.log('Completing lesson:', { pathId, moduleId, lessonId, points: lesson.points, timeSpent });
       completeLesson(pathId, moduleId, lessonId, lesson.points, timeSpent);
 
       // Keep the old user system updated for compatibility
@@ -75,12 +80,11 @@ const Lesson: React.FC = () => {
           experience: user.experience + lesson.points
         });
       }
+      console.log('Lesson completion triggered');
+    } else {
+      console.log('Lesson already completed or missing IDs:', { isCompleted, pathId, moduleId, lessonId });
     }
   };
-
-  const isCompleted = pathId && moduleId && lessonId ?
-    isLessonCompleted(pathId, moduleId, lessonId) || user.completedLessons.includes(lesson.id) :
-    false;
 
   return (
     <div className="max-w-5xl mx-auto">
