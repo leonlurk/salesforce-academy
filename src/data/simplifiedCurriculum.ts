@@ -203,10 +203,26 @@ Let's go make some magic happen! ✨`,
                   title: 'Explore the Salesforce Interface',
                   description: 'Get hands-on experience with a simulated Salesforce environment',
                   module: 'objects',
+                  objectives: [
+                    'Click the App Launcher (grid icon)',
+                    'Navigate to the Accounts tab',
+                    'Open an Account record',
+                    'Use the global search bar',
+                    'Find the Setup gear icon'
+                  ],
                   data: {
                     showIntro: true,
-                    allowedActions: ['view', 'navigate'],
-                    initialView: 'home'
+                    showNavigation: true,
+                    showAppLauncher: true,
+                    allowedActions: ['view', 'navigate', 'search'],
+                    initialView: 'home',
+                    objectives: [
+                      'Click the App Launcher (grid icon)',
+                      'Navigate to the Accounts tab',
+                      'Open an Account record',
+                      'Use the global search bar',
+                      'Find the Setup gear icon'
+                    ]
                   }
                 }
               ]
