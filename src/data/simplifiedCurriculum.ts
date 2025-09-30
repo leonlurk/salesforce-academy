@@ -337,6 +337,28 @@ But first, take 10 minutes to explore! Click around, open tabs, try the shortcut
 Remember: **Every click makes you more confident**. There's nothing you can break by exploring!`,
               interactive: [
                 {
+                  id: 'playground-navigation-mastery',
+                  type: 'playground',
+                  title: 'Master Salesforce Navigation',
+                  description: 'Practice navigating the Lightning Experience interface with real-time feedback',
+                  data: {
+                    module: 'objects',
+                    showNavigation: true,
+                    showAppLauncher: true,
+                    allowedActions: ['view', 'navigate', 'search'],
+                    initialView: 'home',
+                    objectives: [
+                      'Use App Launcher to find Sales app',
+                      'Navigate to Accounts tab',
+                      'Switch list views',
+                      'Use global search',
+                      'Try keyboard shortcuts (Ctrl/Cmd + K)'
+                    ],
+                    keyboardShortcuts: true,
+                    navigationHints: true
+                  }
+                },
+                {
                   type: 'click-sequence',
                   data: {
                     title: 'Navigation Speed Challenge',
@@ -869,6 +891,32 @@ In our next lesson, we'll dive into:
 
 Want to see something cool? Check out the Schema Builder (Setup → Schema Builder) and see your data model visually. It's like seeing the blueprints of what you just built! 🏗️`,
               interactive: [
+                {
+                  id: 'playground-build-data-model',
+                  type: 'playground',
+                  title: 'Build a Project Management Data Model',
+                  description: 'Create custom objects, fields, and relationships to build a complete project tracking system',
+                  data: {
+                    module: 'objects',
+                    showObjectManager: true,
+                    showSchemaBuilder: true,
+                    allowedActions: ['view', 'create', 'edit', 'configure'],
+                    initialView: 'object-manager',
+                    objectives: [
+                      'Create Project custom object',
+                      'Add fields: Client Name, Start Date, End Date, Budget Amount, Status',
+                      'Create Project Task object with Master-Detail to Project',
+                      'Add Task fields: Task Name, Due Date, Status, Assigned To',
+                      'Create Time Entry object with Master-Detail to Project Task',
+                      'Add roll-up summary fields on Project',
+                      'Test complete data flow'
+                    ],
+                    enableDataModel: true,
+                    enableRelationships: true,
+                    guidedSteps: true,
+                    customObjects: ['Project', 'Project_Task', 'Time_Entry']
+                  }
+                },
                 {
                   type: 'click-sequence',
                   data: {
@@ -1726,6 +1774,31 @@ If Workflow Rules are like riding a bicycle, Process Builder is like driving a s
 
 **Pro Tip**: Salesforce is moving to Flow Builder - start planning your migration strategy!`,
               interactive: [
+                {
+                  id: 'playground-process-builder',
+                  type: 'playground',
+                  title: 'Build Automated Processes',
+                  description: 'Create customer onboarding automation using Process Builder with multiple actions',
+                  data: {
+                    module: 'workflows',
+                    showProcessBuilder: true,
+                    showSetup: true,
+                    allowedActions: ['view', 'create', 'edit', 'activate', 'test'],
+                    initialView: 'process-builder',
+                    objectives: [
+                      'Create new process for Account object',
+                      'Add trigger: when Account Type changes to "Customer"',
+                      'Add action: Create onboarding Case',
+                      'Add action: Post to Chatter',
+                      'Add action: Update Account fields',
+                      'Test the complete process',
+                      'Activate and verify automation'
+                    ],
+                    automationTools: true,
+                    processTemplates: ['customer-onboarding', 'lead-conversion', 'opportunity-won'],
+                    enableTesting: true
+                  }
+                },
                 {
                   type: 'click-sequence',
                   data: {
@@ -3166,6 +3239,37 @@ this.dispatchEvent(event);
 
 **Remember**: LWC is about building fast, maintainable, standards-based components!`,
               interactive: [
+                {
+                  id: 'playground-lwc-development',
+                  type: 'playground',
+                  title: 'Create Your First Lightning Web Component',
+                  description: 'Build and deploy a simple LWC component using modern JavaScript and Salesforce standards',
+                  data: {
+                    module: 'lwc',
+                    showDeveloperConsole: true,
+                    showVSCodeSimulator: true,
+                    allowedActions: ['view', 'create', 'edit', 'deploy', 'preview'],
+                    initialView: 'lwc-editor',
+                    objectives: [
+                      'Create helloWorld component folder',
+                      'Write HTML template with lightning-card',
+                      'Add JavaScript controller with @track decorator',
+                      'Style with CSS',
+                      'Configure component metadata',
+                      'Deploy to org',
+                      'Add to Lightning page'
+                    ],
+                    codeExamples: [
+                      'Basic component structure',
+                      'Property binding',
+                      'Event handling',
+                      'Component communication'
+                    ],
+                    enableLivePreview: true,
+                    enableCodeCompletion: true,
+                    lwcTemplates: ['hello-world', 'account-card', 'contact-list']
+                  }
+                },
                 {
                   type: 'click-sequence',
                   data: {
