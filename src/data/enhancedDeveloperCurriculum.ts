@@ -1,7 +1,7 @@
 import type { LearningPath } from '../types';
 
 export const enhancedDeveloperPath: LearningPath = {
-  id: 'developer-enhanced',
+  id: 'developer',
   title: 'Salesforce Developer: Zero to Hero',
   description: 'Transform from complete beginner to Salesforce development expert with our revolutionary step-by-step approach. No prior coding experience required!',
   level: 'Developer',

@@ -1,7 +1,13 @@
 import type { LearningPath } from '../types';
 import { simplifiedLearningPaths } from './simplifiedCurriculum';
+import { enhancedDeveloperPath } from './enhancedDeveloperCurriculum';
 
-export const learningPaths: LearningPath[] = simplifiedLearningPaths.length > 0 ? simplifiedLearningPaths : [
+// Replace the developer path with the enhanced version
+const pathsWithEnhancedDev = simplifiedLearningPaths.map(path => 
+  path.id === 'developer' ? enhancedDeveloperPath : path
+);
+
+export const learningPaths: LearningPath[] = pathsWithEnhancedDev.length > 0 ? pathsWithEnhancedDev : [
   {
     id: 'foundation',
     title: 'Salesforce Foundation',
