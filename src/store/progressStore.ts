@@ -42,6 +42,7 @@ interface ProgressState {
   completeQuiz: (pathId: string, moduleId: string, quizId: string, score: number) => void;
   unlockPath: (pathId: string) => void;
   unlockModule: (pathId: string, moduleId: string) => void;
+  unlockAllForTesting: () => void;
   resetProgress: () => void;
   getPathProgress: (pathId: string) => PathProgress | undefined;
   getModuleProgress: (pathId: string, moduleId: string) => ModuleProgress | undefined;
@@ -224,6 +225,25 @@ export const useProgressStore = create<ProgressState>()(
           if (newProgress.paths[pathId]?.modules[moduleId]) {
             newProgress.paths[pathId].modules[moduleId].locked = false;
           }
+          return { progress: newProgress };
+        });
+      },
+
+      unlockAllForTesting: () => {
+        set((state) => {
+          const newProgress = { ...state.progress };
+          
+          // Unlock all paths
+          Object.keys(newProgress.paths).forEach(pathId => {
+            newProgress.paths[pathId].locked = false;
+            
+            // Unlock all modules in each path
+            Object.keys(newProgress.paths[pathId].modules).forEach(moduleId => {
+              newProgress.paths[pathId].modules[moduleId].locked = false;
+            });
+          });
+          
+          console.log('All paths and modules unlocked for testing:', newProgress);
           return { progress: newProgress };
         });
       },

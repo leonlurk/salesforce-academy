@@ -6,6 +6,7 @@ import type { User, Theme } from './types';
 // Components
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
+import DebugUnlocker from './components/DebugUnlocker';
 import Dashboard from './pages/Dashboard';
 import LearningPaths from './pages/LearningPaths';
 import LearningPath from './pages/LearningPath';
@@ -122,6 +123,9 @@ function App() {
                 className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
               />
             )}
+
+            {/* Debug Unlocker for testing */}
+            <DebugUnlocker />
           </div>
         </Router>
       </UserContext.Provider>
