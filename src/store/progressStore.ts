@@ -65,21 +65,21 @@ const initialProgress: UserProgress = {
     admin: {
       pathId: 'admin',
       completed: false,
-      locked: true,
+      locked: false, // TEMPORARILY UNLOCKED FOR TESTING
       modules: {},
       totalPoints: 0
     },
     developer: {
       pathId: 'developer',
       completed: false,
-      locked: true,
+      locked: false, // TEMPORARILY UNLOCKED FOR TESTING
       modules: {},
       totalPoints: 0
     },
     architect: {
       pathId: 'architect',
       completed: false,
-      locked: true,
+      locked: false, // TEMPORARILY UNLOCKED FOR TESTING
       modules: {},
       totalPoints: 0
     }
@@ -281,19 +281,19 @@ export const useProgressStore = create<ProgressState>()(
             newProgress.paths[pathId] = {
               pathId,
               completed: false,
-              locked: pathId !== 'foundation', // Foundation is always unlocked
+              locked: false, // TEMPORARILY UNLOCKED FOR TESTING - was: pathId !== 'foundation'
               modules: {},
               totalPoints: 0
             };
           }
 
           // Initialize modules if they don't exist
-          modules.forEach((module, index) => {
+          modules.forEach((module) => {
             if (!newProgress.paths[pathId].modules[module.id]) {
               newProgress.paths[pathId].modules[module.id] = {
                 moduleId: module.id,
                 completed: false,
-                locked: index > 0, // First module is unlocked, rest are locked
+                locked: false, // TEMPORARILY UNLOCKED FOR TESTING - was: index > 0
                 lessons: {},
                 totalPoints: 0
               };

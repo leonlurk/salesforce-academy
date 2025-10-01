@@ -19,7 +19,7 @@ export const learningPaths: LearningPath[] = simplifiedLearningPaths.length > 0 
         description: 'Introduction to Salesforce ecosystem, navigation, and core concepts',
         duration: '1 week',
         completed: false,
-        locked: false,
+        locked: false, // UNLOCKED FOR TESTING
         order: 1,
         lessons: [
           {
@@ -111,7 +111,7 @@ export const learningPaths: LearningPath[] = simplifiedLearningPaths.length > 0 
         description: 'Objects, fields, and relationships in Salesforce',
         duration: '1 week',
         completed: false,
-        locked: true,
+        locked: false, // TEMPORARILY UNLOCKED FOR TESTING
         order: 2,
         lessons: [],
         quiz: {
@@ -142,7 +142,7 @@ export const learningPaths: LearningPath[] = simplifiedLearningPaths.length > 0 
         description: 'Managing users, profiles, permission sets, and security',
         duration: '2 weeks',
         completed: false,
-        locked: false,
+        locked: false, // UNLOCKED FOR TESTING
         order: 1,
         lessons: [],
         quiz: {
@@ -160,7 +160,7 @@ export const learningPaths: LearningPath[] = simplifiedLearningPaths.length > 0 
         description: 'Workflow rules, Process Builder, and Flow',
         duration: '3 weeks',
         completed: false,
-        locked: true,
+        locked: false, // TEMPORARILY UNLOCKED FOR TESTING
         order: 2,
         lessons: [],
         quiz: {
@@ -191,7 +191,7 @@ export const learningPaths: LearningPath[] = simplifiedLearningPaths.length > 0 
         description: 'Master Salesforce\'s programming language',
         duration: '4 weeks',
         completed: false,
-        locked: false,
+        locked: false, // UNLOCKED FOR TESTING
         order: 1,
         lessons: [],
         quiz: {
@@ -209,7 +209,7 @@ export const learningPaths: LearningPath[] = simplifiedLearningPaths.length > 0 
         description: 'Build modern user interfaces with LWC',
         duration: '4 weeks',
         completed: false,
-        locked: true,
+        locked: false, // TEMPORARILY UNLOCKED FOR TESTING
         order: 2,
         lessons: [],
         quiz: {
@@ -240,7 +240,7 @@ export const learningPaths: LearningPath[] = simplifiedLearningPaths.length > 0 
         description: 'Designing scalable Salesforce solutions',
         duration: '4 weeks',
         completed: false,
-        locked: false,
+        locked: false, // UNLOCKED FOR TESTING
         order: 1,
         lessons: [],
         quiz: {
@@ -258,7 +258,7 @@ export const learningPaths: LearningPath[] = simplifiedLearningPaths.length > 0 
         description: 'Integrate Salesforce with external systems',
         duration: '4 weeks',
         completed: false,
-        locked: true,
+        locked: false, // TEMPORARILY UNLOCKED FOR TESTING
         order: 2,
         lessons: [],
         quiz: {
