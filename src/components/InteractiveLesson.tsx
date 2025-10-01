@@ -14,7 +14,7 @@ import {
   X
 } from 'lucide-react';
 import type { InteractiveElement } from '../types';
-import SalesforcePlayground from './SalesforcePlayground';
+import EnhancedPlayground from './EnhancedPlayground';
 
 interface Step {
   instruction: string;
@@ -406,16 +406,16 @@ const InteractiveLesson: React.FC<InteractiveLessonProps> = ({ exercises, onComp
 
               {/* Modal Content */}
               <div className="h-[calc(95vh-80px)] overflow-hidden">
-                <SalesforcePlayground
-                  title={exercise.title}
-                  description={exercise.description}
-                  data={{
-                    module: (exercise.module as 'objects' | 'fields' | 'workflows' | 'reports' | 'apex' | 'lwc' | 'integration') || 'objects',
+                <EnhancedPlayground
+                  title={exercise.title || 'Interactive Playground'}
+                  description={exercise.description || 'Practice in a simulated environment'}
+                  data={exercise.data || {
+                    module: 'objects',
                     objectives: exercise.objectives || [],
                     showNavigation: true,
                     showAppLauncher: true
                   }}
-                  onComplete={(results) => {
+                  onComplete={(results: any) => {
                     console.log('Playground completed:', results);
                     setIsComplete(true);
                     setShowFeedback(true);
