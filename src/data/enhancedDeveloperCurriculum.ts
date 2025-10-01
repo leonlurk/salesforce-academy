@@ -146,57 +146,207 @@ In the next lesson, we'll:
 **Ready to continue your journey?** Let's go! 🚀`,
             interactive: [
               {
-                type: 'drag-drop',
-                title: 'Build Your First Algorithm',
-                description: 'Drag the steps to create a logical sequence for "Ordering Pizza Online"',
+                type: 'playground',
+                title: 'Programming Concepts Interactive Lab',
+                description: 'Master programming thinking through hands-on exercises with real-time feedback',
                 data: {
-                  items: [
-                    'Open pizza website',
-                    'Choose pizza size',
-                    'Add toppings',
-                    'Enter delivery address',
-                    'Choose payment method',
-                    'Place order',
-                    'Wait for delivery',
-                    'Enjoy pizza!'
+                  mode: 'guided-learning',
+                  enableHints: true,
+                  enableProgressTracking: true,
+                  exercises: [
+                    {
+                      id: 'algorithm-builder',
+                      type: 'drag-drop',
+                      title: 'Build Your First Algorithm',
+                      difficulty: 'beginner',
+                      description: 'Drag the steps to create a logical sequence for "Ordering Pizza Online"',
+                      instructions: [
+                        'Think about the order you would follow in real life',
+                        'Each step should logically follow the previous one',
+                        'No step should be skipped or repeated'
+                      ],
+                      items: [
+                        'Open pizza website',
+                        'Choose pizza size',
+                        'Add toppings',
+                        'Enter delivery address',
+                        'Choose payment method',
+                        'Place order',
+                        'Wait for delivery',
+                        'Enjoy pizza!'
+                      ],
+                      correctOrder: [0, 1, 2, 3, 4, 5, 6, 7],
+                      hints: [
+                        'Start with how you access the website',
+                        'You need to configure your pizza before checking out',
+                        'Payment comes after you know the total cost'
+                      ],
+                      validation: {
+                        checkOrder: true,
+                        allowPartialCredit: true,
+                        showProgress: true
+                      },
+                      feedback: {
+                        success: '🎉 Perfect! You just created your first algorithm - a step-by-step solution to a problem. This is exactly what programming is!',
+                        partial: 'Good start! You have {correct} out of {total} steps in the right order. Try moving the highlighted steps.',
+                        incorrect: 'Not quite! Think about what must happen before you can place an order. Need a hint?'
+                      }
+                    },
+                    {
+                      id: 'pattern-recognition',
+                      type: 'multiple-choice-interactive',
+                      title: 'Identify Programming Patterns',
+                      difficulty: 'beginner',
+                      description: 'Match each scenario with its programming pattern',
+                      instructions: [
+                        'Sequence: Steps that must happen in order',
+                        'Selection: Making decisions (IF-THEN)',
+                        'Iteration: Repeating actions (FOR-EACH, WHILE)'
+                      ],
+                      scenarios: [
+                        {
+                          id: 'scenario-1',
+                          text: 'Check each email in inbox and mark as read',
+                          correctPattern: 'iteration',
+                          explanation: 'This repeats an action (mark as read) for each item (email)',
+                          hint: 'This involves doing the same thing multiple times'
+                        },
+                        {
+                          id: 'scenario-2',
+                          text: 'If temperature > 80°F, turn on air conditioning',
+                          correctPattern: 'selection',
+                          explanation: 'This makes a decision based on a condition',
+                          hint: 'Notice the IF statement - this is making a choice'
+                        },
+                        {
+                          id: 'scenario-3',
+                          text: 'Open app, login, navigate to dashboard',
+                          correctPattern: 'sequence',
+                          explanation: 'These steps must happen in order',
+                          hint: 'Each step must follow the previous one'
+                        },
+                        {
+                          id: 'scenario-4',
+                          text: 'For every customer with overdue payment, send reminder email',
+                          correctPattern: 'iteration',
+                          explanation: 'This repeats the same action (send email) for multiple customers',
+                          hint: 'The word "every" suggests repetition'
+                        },
+                        {
+                          id: 'scenario-5',
+                          text: 'If order total > $100, apply free shipping, otherwise charge $10',
+                          correctPattern: 'selection',
+                          explanation: 'This makes a decision with an alternative action',
+                          hint: 'Look for IF...THEN...OTHERWISE structure'
+                        }
+                      ],
+                      feedback: {
+                        allCorrect: '🌟 Excellent! You can recognize all three fundamental programming patterns!',
+                        mostCorrect: 'Great job! You got {correct} out of {total}. Review the explanations for the ones you missed.',
+                        needsPractice: 'Keep practicing! Remember: Sequence=order, Selection=decisions, Iteration=repetition'
+                      }
+                    },
+                    {
+                      id: 'real-world-algorithm',
+                      type: 'text-builder',
+                      title: 'Write Your Own Algorithm',
+                      difficulty: 'intermediate',
+                      description: 'Create a step-by-step algorithm for "Making Coffee"',
+                      instructions: [
+                        'Break down the task into clear, specific steps',
+                        'Include decision points (IF statements)',
+                        'Include repetition (WHILE/FOR loops)',
+                        'Make it detailed enough that anyone could follow'
+                      ],
+                      template: [
+                        '1. Check IF coffee beans are available',
+                        '2. THEN...',
+                        '3. WHILE water is not boiling...',
+                        '4. FOR each scoop of coffee...'
+                      ],
+                      sampleSolution: [
+                        'IF coffee beans are empty THEN buy more beans',
+                        'Fill water reservoir',
+                        'WHILE water is not boiling WAIT',
+                        'FOR each scoop needed ADD coffee grounds',
+                        'IF using filter THEN place filter in basket',
+                        'Start brewing',
+                        'WHILE coffee is brewing WAIT',
+                        'IF coffee tastes good THEN enjoy, ELSE adjust next time'
+                      ],
+                      hints: [
+                        'What do you need to check before starting?',
+                        'What steps might need to wait for something?',
+                        'What actions repeat multiple times?'
+                      ],
+                      validation: {
+                        checkForPatterns: ['IF', 'THEN', 'WHILE', 'FOR'],
+                        minimumSteps: 5,
+                        requiresDecision: true,
+                        requiresLoop: true
+                      },
+                      feedback: {
+                        success: '☕ Amazing! You wrote a complete algorithm with decisions and loops!',
+                        missingDecision: 'Good start! Try adding an IF-THEN decision point.',
+                        missingLoop: 'Almost there! Add a WHILE or FOR loop for repetitive actions.',
+                        tooShort: 'Add more detail! Break it down into smaller steps.'
+                      }
+                    },
+                    {
+                      id: 'salesforce-thinking',
+                      type: 'scenario-matching',
+                      title: 'Think Like a Salesforce Developer',
+                      difficulty: 'intermediate',
+                      description: 'Match business requirements to programming patterns',
+                      instructions: [
+                        'Read each business requirement',
+                        'Think about which programming pattern solves it',
+                        'Consider real Salesforce scenarios'
+                      ],
+                      scenarios: [
+                        {
+                          requirement: 'When an Opportunity is marked as Won, automatically create a welcome email task',
+                          correctPattern: 'sequence',
+                          explanation: 'This is a sequence of actions: detect change → create task → assign details',
+                          salesforceContext: 'This would be a trigger or workflow'
+                        },
+                        {
+                          requirement: 'If an Account has revenue > $1M, assign to Enterprise Sales team, otherwise assign to SMB team',
+                          correctPattern: 'selection',
+                          explanation: 'This uses IF-THEN logic to make a decision based on a condition',
+                          salesforceContext: 'This would be an assignment rule or process builder'
+                        },
+                        {
+                          requirement: 'For every Contact in California, update their time zone field to PST',
+                          correctPattern: 'iteration',
+                          explanation: 'This loops through multiple records and performs the same action',
+                          salesforceContext: 'This would be a batch Apex or Flow'
+                        }
+                      ],
+                      feedback: {
+                        allCorrect: '🚀 You\'re thinking like a Salesforce developer! You can translate business needs into code patterns!',
+                        mostCorrect: 'Great progress! {correct}/{total} correct. Review the Salesforce context for each.',
+                        needsReview: 'Review the three patterns and try again. Each business requirement maps to one pattern.'
+                      }
+                    }
                   ],
-                  correctOrder: [0, 1, 2, 3, 4, 5, 6, 7],
-                  categories: {
-                    'sequence': 'Drag items in the correct order',
-                    'decisions': 'What decisions need to be made?',
-                    'loops': 'What steps might repeat?'
+                  completionCriteria: {
+                    minimumScore: 80,
+                    mustCompleteAll: true,
+                    allowRetries: true
+                  },
+                  rewards: {
+                    points: 200,
+                    badge: 'Programming Thinker',
+                    message: 'You\'ve mastered programming thinking! You\'re ready to start reading code.'
                   }
                 },
                 validation: {
-                  checkOrder: true,
-                  allowPartialCredit: true
+                  trackProgress: true,
+                  saveProgress: true,
+                  allowReplay: true
                 },
-                feedback: 'Great job! You just created an algorithm - a step-by-step solution to a problem. This is exactly what programming is!'
-              },
-              {
-                type: 'click-sequence',
-                title: 'Identify Programming Patterns',
-                description: 'Click on examples that show Sequence, Selection, or Iteration',
-                data: {
-                  scenarios: [
-                    {
-                      text: 'Check each email in inbox and mark as read',
-                      pattern: 'iteration',
-                      explanation: 'This repeats an action (mark as read) for each item (email)'
-                    },
-                    {
-                      text: 'If temperature > 80°F, turn on air conditioning',
-                      pattern: 'selection',
-                      explanation: 'This makes a decision based on a condition'
-                    },
-                    {
-                      text: 'Open app, login, navigate to dashboard',
-                      pattern: 'sequence',
-                      explanation: 'These steps must happen in order'
-                    }
-                  ]
-                },
-                feedback: 'Perfect! You can already recognize the building blocks of programming!'
+                feedback: 'Congratulations! You now think like a programmer. Every line of code you write will use these three patterns!'
               }
             ],
             resources: [
@@ -721,66 +871,362 @@ try {
 **Ready to see code in action?** Let's explore the Developer Console! 🔧`,
             interactive: [
               {
-                type: 'code-editor',
-                title: 'Code Pattern Detective',
-                description: 'Identify what each code snippet does',
+                type: 'playground',
+                title: 'Code Detective: Interactive Analysis Lab',
+                description: 'Learn to read and understand Apex code through hands-on detective work',
                 data: {
+                  mode: 'code-analysis',
+                  enableSyntaxHighlighting: true,
+                  enableLineByLine: true,
+                  enableHints: true,
                   exercises: [
                     {
+                      id: 'basic-code-reading',
+                      type: 'annotated-code',
+                      title: 'Code Pattern Detective',
+                      difficulty: 'beginner',
+                      description: 'Click on code elements to learn what they do',
                       code: `String greeting = 'Hello, ' + userName + '!';
 System.debug(greeting);`,
-                      question: 'What does this code do?',
-                      options: [
-                        'Creates a personalized greeting and logs it',
-                        'Deletes user data',
-                        'Sends an email',
-                        'Creates a new user'
+                      annotations: [
+                        {
+                          line: 1,
+                          element: 'String',
+                          explanation: 'Data type for text values',
+                          category: 'data-type'
+                        },
+                        {
+                          line: 1,
+                          element: 'greeting',
+                          explanation: 'Variable name - stores the greeting text',
+                          category: 'variable'
+                        },
+                        {
+                          line: 1,
+                          element: '+',
+                          explanation: 'Concatenation operator - combines text',
+                          category: 'operator'
+                        },
+                        {
+                          line: 2,
+                          element: 'System.debug',
+                          explanation: 'Logs a message to help developers see what\'s happening',
+                          category: 'method'
+                        }
                       ],
-                      correct: 0,
-                      explanation: 'This code combines text with a username to create a greeting, then logs it for debugging.'
+                      questions: [
+                        {
+                          question: 'What does this code do?',
+                          options: [
+                            'Creates a personalized greeting and logs it',
+                            'Deletes user data',
+                            'Sends an email',
+                            'Creates a new user'
+                          ],
+                          correct: 0,
+                          explanation: 'This code combines text with a username to create a greeting, then logs it for debugging.'
+                        }
+                      ],
+                      hints: [
+                        'Look at the + operator - it\'s joining text together',
+                        'System.debug shows information in the logs',
+                        'This creates but doesn\'t send any data'
+                      ]
                     },
                     {
+                      id: 'condition-analysis',
+                      type: 'code-trace',
+                      title: 'Decision Logic Detective',
+                      difficulty: 'beginner',
+                      description: 'Trace how the code makes decisions',
                       code: `if (opportunity.StageName == 'Closed Won') {
     opportunity.Probability = 100;
+    System.debug('Opportunity won!');
+} else {
+    System.debug('Opportunity still in progress');
 }`,
-                      question: 'When does this code run?',
-                      options: [
-                        'Always',
-                        'Only when an opportunity is won',
-                        'Only when probability is 100',
-                        'Never'
+                      traceSteps: [
+                        {
+                          step: 1,
+                          description: 'Check the condition: Is StageName equal to "Closed Won"?',
+                          highlight: 'line-1'
+                        },
+                        {
+                          step: 2,
+                          description: 'IF true: Set Probability to 100',
+                          highlight: 'line-2',
+                          condition: 'true'
+                        },
+                        {
+                          step: 3,
+                          description: 'IF true: Log success message',
+                          highlight: 'line-3',
+                          condition: 'true'
+                        },
+                        {
+                          step: 4,
+                          description: 'IF false: Log in-progress message',
+                          highlight: 'line-5',
+                          condition: 'false'
+                        }
                       ],
-                      correct: 1,
-                      explanation: 'The IF condition checks if the stage is "Closed Won", and only then sets probability to 100%.'
+                      scenarios: [
+                        {
+                          name: 'Scenario 1: Won Opportunity',
+                          input: { StageName: 'Closed Won', Probability: 90 },
+                          expected: { Probability: 100, debugMessage: 'Opportunity won!' },
+                          explanation: 'Condition is TRUE, so probability is updated to 100'
+                        },
+                        {
+                          name: 'Scenario 2: Open Opportunity',
+                          input: { StageName: 'Prospecting', Probability: 10 },
+                          expected: { Probability: 10, debugMessage: 'Opportunity still in progress' },
+                          explanation: 'Condition is FALSE, so probability stays the same'
+                        }
+                      ],
+                      questions: [
+                        {
+                          question: 'When does this code set probability to 100?',
+                          options: [
+                            'Always',
+                            'Only when an opportunity is won',
+                            'Only when probability is already 100',
+                            'Never'
+                          ],
+                          correct: 1,
+                          explanation: 'The IF condition checks if the stage is "Closed Won", and only then sets probability to 100%.'
+                        }
+                      ]
+                    },
+                    {
+                      id: 'loop-analysis',
+                      type: 'execution-simulator',
+                      title: 'Loop Pattern Detective',
+                      difficulty: 'intermediate',
+                      description: 'Watch how loops process multiple records',
+                      code: `List<Contact> contacts = [SELECT Id, Name FROM Contact LIMIT 3];
+for (Contact con : contacts) {
+    System.debug('Processing: ' + con.Name);
+    con.Status__c = 'Active';
+}`,
+                      execution: {
+                        sampleData: [
+                          { Id: '001', Name: 'John Smith' },
+                          { Id: '002', Name: 'Jane Doe' },
+                          { Id: '003', Name: 'Bob Johnson' }
+                        ],
+                        steps: [
+                          {
+                            iteration: 1,
+                            currentRecord: { Name: 'John Smith' },
+                            action: 'Processing: John Smith',
+                            result: 'Status__c set to Active'
+                          },
+                          {
+                            iteration: 2,
+                            currentRecord: { Name: 'Jane Doe' },
+                            action: 'Processing: Jane Doe',
+                            result: 'Status__c set to Active'
+                          },
+                          {
+                            iteration: 3,
+                            currentRecord: { Name: 'Bob Johnson' },
+                            action: 'Processing: Bob Johnson',
+                            result: 'Status__c set to Active'
+                          }
+                        ]
+                      },
+                      questions: [
+                        {
+                          question: 'How many times will the code inside the loop run?',
+                          options: ['Once', 'Twice', 'Three times', 'Until manually stopped'],
+                          correct: 2,
+                          explanation: 'The loop runs once for each contact in the list (3 contacts = 3 iterations)'
+                        },
+                        {
+                          question: 'What happens to each contact?',
+                          options: [
+                            'Gets deleted',
+                            'Gets their Status field set to Active',
+                            'Gets sent an email',
+                            'Nothing changes'
+                          ],
+                          correct: 1,
+                          explanation: 'Each contact has their Status__c field updated to "Active"'
+                        }
+                      ]
+                    },
+                    {
+                      id: 'real-world-analysis',
+                      type: 'code-comprehension',
+                      title: 'Real Business Logic Detective',
+                      difficulty: 'intermediate',
+                      description: 'Analyze code that solves actual business problems',
+                      code: `public class OpportunityHelper {
+    public static void checkLargeDeals(List<Opportunity> opportunities) {
+        for (Opportunity opp : opportunities) {
+            if (opp.Amount > 100000) {
+                opp.Priority__c = 'High';
+                System.debug('Large deal found: ' + opp.Name);
+            }
+        }
+    }
+}`,
+                      analysis: {
+                        breakdown: [
+                          {
+                            section: 'Class Declaration',
+                            lines: '1',
+                            explanation: 'Creates a helper class to organize related code',
+                            businessValue: 'Keeps code organized and reusable'
+                          },
+                          {
+                            section: 'Method Signature',
+                            lines: '2',
+                            explanation: 'Defines a method that accepts a list of opportunities',
+                            businessValue: 'Can process multiple opportunities at once (bulk processing)'
+                          },
+                          {
+                            section: 'Loop Through Records',
+                            lines: '3',
+                            explanation: 'Examines each opportunity one by one',
+                            businessValue: 'Ensures no opportunity is missed'
+                          },
+                          {
+                            section: 'Business Rule Check',
+                            lines: '4',
+                            explanation: 'Checks if deal size exceeds $100,000',
+                            businessValue: 'Identifies high-value opportunities for special attention'
+                          },
+                          {
+                            section: 'Update Priority',
+                            lines: '5',
+                            explanation: 'Marks large deals as high priority',
+                            businessValue: 'Ensures sales team focuses on biggest opportunities'
+                          },
+                          {
+                            section: 'Logging',
+                            lines: '6',
+                            explanation: 'Records which large deals were found',
+                            businessValue: 'Creates audit trail for review'
+                          }
+                        ]
+                      },
+                      questions: [
+                        {
+                          question: 'What type of records does this code work with?',
+                          answer: 'Opportunity records (sales deals)',
+                          type: 'short-answer'
+                        },
+                        {
+                          question: 'What condition triggers the priority update?',
+                          answer: 'Deal amount over $100,000',
+                          type: 'short-answer'
+                        },
+                        {
+                          question: 'What business problem does this solve?',
+                          options: [
+                            'Automatically identifies and prioritizes large sales deals',
+                            'Deletes small opportunities',
+                            'Sends emails to customers',
+                            'Creates new accounts'
+                          ],
+                          correct: 0,
+                          explanation: 'This code automatically flags high-value deals so sales teams can focus on them'
+                        }
+                      ],
+                      hints: [
+                        'Look for the number 100000 - that\'s the threshold',
+                        'Priority__c is being set to "High"',
+                        'This helps sales managers identify important deals'
+                      ]
+                    },
+                    {
+                      id: 'sequence-ordering',
+                      type: 'drag-drop',
+                      title: 'Code Execution Sequence',
+                      difficulty: 'beginner',
+                      description: 'Arrange these code steps in correct execution order',
+                      scenario: 'Creating and saving a Task record',
+                      items: [
+                        'Create new Task object',
+                        'Set task subject',
+                        'Set task due date',
+                        'Link task to Account',
+                        'Save task to database',
+                        'Log success message'
+                      ],
+                      correctOrder: [0, 1, 2, 3, 4, 5],
+                      codeExample: `Task newTask = new Task();
+newTask.Subject = 'Follow up';
+newTask.ActivityDate = Date.today().addDays(7);
+newTask.WhatId = accountId;
+insert newTask;
+System.debug('Task created: ' + newTask.Id);`,
+                      explanation: 'You must create the object, set its properties, then save it. Logging happens after save to capture the new ID.',
+                      hints: [
+                        'Start by creating the object',
+                        'Set all properties before saving',
+                        'Save before you can log the ID'
+                      ]
+                    },
+                    {
+                      id: 'variable-tracing',
+                      type: 'value-tracker',
+                      title: 'Track Variable Values',
+                      difficulty: 'intermediate',
+                      description: 'Follow how variables change as code executes',
+                      code: `Integer count = 0;
+String message = 'Processing';
+
+for (Integer i = 0; i < 3; i++) {
+    count = count + 1;
+    message = message + ' item ' + i;
+    System.debug(message);
+}`,
+                      trace: [
+                        { line: 1, variables: { count: 0 }, explanation: 'Initialize count to 0' },
+                        { line: 2, variables: { count: 0, message: 'Processing' }, explanation: 'Initialize message' },
+                        { line: 4, variables: { count: 0, message: 'Processing', i: 0 }, explanation: 'Loop iteration 1 starts' },
+                        { line: 5, variables: { count: 1, message: 'Processing', i: 0 }, explanation: 'Increment count' },
+                        { line: 6, variables: { count: 1, message: 'Processing item 0', i: 0 }, explanation: 'Append to message' },
+                        { line: 4, variables: { count: 1, message: 'Processing item 0', i: 1 }, explanation: 'Loop iteration 2 starts' },
+                        { line: 5, variables: { count: 2, message: 'Processing item 0', i: 1 }, explanation: 'Increment count' },
+                        { line: 6, variables: { count: 2, message: 'Processing item 0 item 1', i: 1 }, explanation: 'Append to message' }
+                      ],
+                      questions: [
+                        {
+                          question: 'What is the final value of count?',
+                          options: ['0', '1', '2', '3'],
+                          correct: 3,
+                          explanation: 'Count increments each loop iteration: 0 → 1 → 2 → 3'
+                        },
+                        {
+                          question: 'How many times does System.debug run?',
+                          options: ['Once', 'Twice', 'Three times', 'Never'],
+                          correct: 2,
+                          explanation: 'System.debug runs once per loop iteration (3 times total)'
+                        }
+                      ]
                     }
-                  ]
-                },
-                validation: {
-                  requireAllCorrect: false,
-                  showExplanations: true
-                },
-                feedback: 'Excellent detective work! You\'re learning to read code like a pro!'
-              },
-              {
-                type: 'drag-drop',
-                title: 'Code Flow Sequencing',
-                description: 'Arrange these code lines in the correct execution order',
-                data: {
-                  items: [
-                    'Create new Task object',
-                    'Set task subject',
-                    'Set task due date', 
-                    'Save task to database',
-                    'Log success message'
                   ],
-                  correctOrder: [0, 1, 2, 3, 4],
-                  codeContext: 'Building a task creation process'
+                  completionCriteria: {
+                    minimumScore: 85,
+                    mustCompleteAll: true,
+                    allowRetries: true
+                  },
+                  rewards: {
+                    points: 300,
+                    badge: 'Code Detective',
+                    message: 'You can now read and understand Apex code! Time to learn the Developer Console.'
+                  }
                 },
                 validation: {
-                  checkOrder: true,
-                  allowPartialCredit: true
+                  trackProgress: true,
+                  saveProgress: true,
+                  showStepByStep: true
                 },
-                feedback: 'Perfect! You understand the logical flow of code execution!'
+                feedback: 'Outstanding detective work! You can now read code like a pro and understand how it solves business problems!'
               }
             ],
             resources: [
@@ -1005,34 +1451,303 @@ In the next lesson, we'll:
             interactive: [
               {
                 type: 'playground',
-                title: 'Developer Console Simulator',
-                description: 'Practice using the Developer Console in a safe environment',
+                title: 'Developer Console: Full Interactive Simulation',
+                description: 'Master the Developer Console through hands-on practice with realistic simulation',
                 data: {
-                  showDeveloperConsole: true,
-                  allowedActions: ['view', 'execute', 'query', 'debug'],
-                  initialView: 'execute-anonymous',
-                  objectives: [
-                    'Execute your first debug statement',
-                    'Run a simple SOQL query',
-                    'View execution logs',
-                    'Navigate between tabs'
-                  ],
-                  preloadedCode: {
-                    'execute-anonymous': `// Your first code - try executing this!
+                  mode: 'developer-console-full',
+                  enableRealisticUI: true,
+                  enableAllFeatures: true,
+                  enableGuidedTutorials: true,
+                  consoleFeatures: {
+                    tabs: ['execute-anonymous', 'query-editor', 'logs', 'tests', 'checkpoints'],
+                    enableSyntaxHighlighting: true,
+                    enableAutoComplete: true,
+                    enableErrorHighlighting: true,
+                    enableLineNumbers: true
+                  },
+                  missions: [
+                    {
+                      id: 'first-execution',
+                      title: 'Mission 1: Execute Your First Code',
+                      difficulty: 'beginner',
+                      description: 'Learn to run code in the Execute Anonymous window',
+                      steps: [
+                        {
+                          instruction: 'Click on the "Execute Anonymous" tab',
+                          validation: { checkTab: 'execute-anonymous' },
+                          hint: 'Look for the tab at the top of the console'
+                        },
+                        {
+                          instruction: 'Type or paste this code: System.debug(\'Hello, Developer!\');',
+                          validation: { checkCode: 'System.debug' },
+                          hint: 'Make sure to include the semicolon at the end'
+                        },
+                        {
+                          instruction: 'Click the "Execute" button',
+                          validation: { checkAction: 'execute' },
+                          hint: 'The Execute button is usually at the bottom'
+                        },
+                        {
+                          instruction: 'Open the Logs tab to see your message',
+                          validation: { checkTab: 'logs', checkLogContent: 'Hello, Developer!' },
+                          hint: 'Logs show what happened when your code ran'
+                        }
+                      ],
+                      preloadedCode: `// Your first code - try executing this!
 System.debug('Hello from the Developer Console!');
 String todayDate = String.valueOf(Date.today());
 System.debug('Today is: ' + todayDate);`,
-                    'query-editor': `-- Your first query - try running this!
+                      rewards: {
+                        points: 50,
+                        message: '🎉 You just ran your first Salesforce code!'
+                      }
+                    },
+                    {
+                      id: 'variable-exploration',
+                      title: 'Mission 2: Work with Variables',
+                      difficulty: 'beginner',
+                      description: 'Create variables and see their values in logs',
+                      steps: [
+                        {
+                          instruction: 'Create a String variable with your name',
+                          example: 'String myName = \'Your Name\';',
+                          validation: { checkCode: 'String', checkCode2: '=' },
+                          hint: 'Use String datatype and assign your name in quotes'
+                        },
+                        {
+                          instruction: 'Create an Integer variable with your age',
+                          example: 'Integer myAge = 25;',
+                          validation: { checkCode: 'Integer' },
+                          hint: 'Integers don\'t need quotes'
+                        },
+                        {
+                          instruction: 'Use System.debug to print both variables',
+                          example: 'System.debug(\'Name: \' + myName + \', Age: \' + myAge);',
+                          validation: { checkCode: 'System.debug', checkExecution: true },
+                          hint: 'You can combine text and variables with +'
+                        },
+                        {
+                          instruction: 'Execute and check the logs',
+                          validation: { checkLogs: true },
+                          hint: 'Your debug messages should appear in the Logs tab'
+                        }
+                      ],
+                      starterTemplate: `// Create your variables here
+
+// Debug them here
+`,
+                      rewards: {
+                        points: 75,
+                        message: '💪 You can now work with variables!'
+                      }
+                    },
+                    {
+                      id: 'query-master',
+                      title: 'Mission 3: Query Salesforce Data',
+                      difficulty: 'beginner',
+                      description: 'Use the Query Editor to retrieve data from Salesforce',
+                      steps: [
+                        {
+                          instruction: 'Click on the "Query Editor" tab',
+                          validation: { checkTab: 'query-editor' },
+                          hint: 'This tab lets you search for data in Salesforce'
+                        },
+                        {
+                          instruction: 'Write a query to get Account names',
+                          example: 'SELECT Id, Name FROM Account LIMIT 5',
+                          validation: { checkQuery: ['SELECT', 'FROM', 'Account'] },
+                          hint: 'Start with SELECT, then field names, then FROM object name'
+                        },
+                        {
+                          instruction: 'Click "Execute" to run the query',
+                          validation: { checkAction: 'query-execute' },
+                          hint: 'The Execute button runs your query'
+                        },
+                        {
+                          instruction: 'Review the results returned',
+                          validation: { checkResults: true },
+                          hint: 'Results show in a table below the query'
+                        }
+                      ],
+                      preloadedQuery: `-- Your first query - try running this!
 SELECT Id, Name, CreatedDate 
 FROM Account 
-LIMIT 3`
+LIMIT 3`,
+                      sampleData: [
+                        { Id: '001xxx', Name: 'Acme Corp', CreatedDate: '2024-01-15' },
+                        { Id: '001yyy', Name: 'Global Industries', CreatedDate: '2024-02-20' },
+                        { Id: '001zzz', Name: 'Tech Solutions', CreatedDate: '2024-03-10' }
+                      ],
+                      rewards: {
+                        points: 100,
+                        message: '🔍 You can now query Salesforce data!'
+                      }
+                    },
+                    {
+                      id: 'debugging-master',
+                      title: 'Mission 4: Debug Like a Pro',
+                      difficulty: 'intermediate',
+                      description: 'Learn to use debug logs to troubleshoot code',
+                      steps: [
+                        {
+                          instruction: 'Write code that creates a Contact',
+                          example: 'Contact con = new Contact(FirstName=\'John\', LastName=\'Doe\');',
+                          validation: { checkCode: 'Contact' },
+                          hint: 'Use the Contact object with FirstName and LastName'
+                        },
+                        {
+                          instruction: 'Add debug statements before and after creation',
+                          example: 'System.debug(\'Before: \' + con);',
+                          validation: { checkCode: 'System.debug', checkMultiple: true },
+                          hint: 'Debug statements help you see what\'s happening'
+                        },
+                        {
+                          instruction: 'Execute and analyze the logs',
+                          validation: { checkLogs: true, checkLogDetail: true },
+                          hint: 'Logs show the step-by-step execution of your code'
+                        },
+                        {
+                          instruction: 'Identify the Contact object in the logs',
+                          validation: { checkLogContent: 'Contact' },
+                          hint: 'Look for Contact: followed by field values'
+                        }
+                      ],
+                      starterTemplate: `// Create a Contact
+
+// Add debug statements
+
+// What do the logs tell you?
+`,
+                      rewards: {
+                        points: 125,
+                        message: '🐛 You\'re now a debugging pro!'
+                      }
+                    },
+                    {
+                      id: 'real-world-scenario',
+                      title: 'Mission 5: Real Business Logic',
+                      difficulty: 'intermediate',
+                      description: 'Solve a real business problem using the Developer Console',
+                      scenario: {
+                        problem: 'Update all Contacts in California to have "PST" timezone',
+                        requirements: [
+                          'Query Contacts where MailingState = \'CA\'',
+                          'Update their TimeZone__c field to \'PST\'',
+                          'Use a loop to process multiple records',
+                          'Debug the count of updated records'
+                        ]
+                      },
+                      steps: [
+                        {
+                          instruction: 'Query California contacts',
+                          example: 'List<Contact> contacts = [SELECT Id FROM Contact WHERE MailingState = \'CA\'];',
+                          validation: { checkCode: ['SELECT', 'WHERE', 'MailingState'] },
+                          hint: 'Use SOQL to query contacts with a WHERE clause'
+                        },
+                        {
+                          instruction: 'Loop through the contacts',
+                          example: 'for (Contact con : contacts) { }',
+                          validation: { checkCode: 'for' },
+                          hint: 'Use a for-each loop to process each contact'
+                        },
+                        {
+                          instruction: 'Update the timezone field',
+                          example: 'con.TimeZone__c = \'PST\';',
+                          validation: { checkCode: 'TimeZone__c' },
+                          hint: 'Set the field value inside the loop'
+                        },
+                        {
+                          instruction: 'Save the changes',
+                          example: 'update contacts;',
+                          validation: { checkCode: 'update' },
+                          hint: 'Use the update DML statement after the loop'
+                        },
+                        {
+                          instruction: 'Debug the count of updated records',
+                          example: 'System.debug(\'Updated \' + contacts.size() + \' contacts\');',
+                          validation: { checkCode: 'size()' },
+                          hint: 'Use .size() to get the count of records in a list'
+                        }
+                      ],
+                      starterTemplate: `// Query California contacts
+
+// Loop and update timezone
+
+// Save changes
+
+// Debug results
+`,
+                      solution: `List<Contact> contacts = [SELECT Id FROM Contact WHERE MailingState = 'CA'];
+for (Contact con : contacts) {
+    con.TimeZone__c = 'PST';
+}
+update contacts;
+System.debug('Updated ' + contacts.size() + ' contacts');`,
+                      rewards: {
+                        points: 200,
+                        badge: 'Developer Console Master',
+                        message: '🏆 You solved a real business problem! You\'re ready for production coding!'
+                      }
+                    }
+                  ],
+                  freePlay: {
+                    enabled: true,
+                    description: 'Experiment freely with the Developer Console',
+                    features: [
+                      'Write any Apex code',
+                      'Run any SOQL query',
+                      'View detailed logs',
+                      'Test different scenarios'
+                    ],
+                    safetyNet: {
+                      enabled: true,
+                      message: 'This is a safe simulation - you can\'t break anything!'
+                    }
+                  },
+                  helpSystem: {
+                    enabled: true,
+                    quickReference: {
+                      'System.debug': 'Logs a message to the debug logs',
+                      'SOQL': 'SELECT fields FROM object WHERE condition',
+                      'DML': 'insert, update, delete, upsert operations',
+                      'Variables': 'String, Integer, Boolean, Decimal, Date, etc.',
+                      'Loops': 'for (Type var : collection) { }'
+                    },
+                    commonErrors: [
+                      {
+                        error: 'Unexpected token',
+                        cause: 'Missing semicolon or quote',
+                        fix: 'Check that each statement ends with ;'
+                      },
+                      {
+                        error: 'Variable does not exist',
+                        cause: 'Typo in variable name',
+                        fix: 'Check spelling and capitalization'
+                      },
+                      {
+                        error: 'DML requires SObject',
+                        cause: 'Trying to save without an object',
+                        fix: 'Create an object before using insert/update'
+                      }
+                    ]
+                  },
+                  completionCriteria: {
+                    minimumMissions: 4,
+                    minimumScore: 450,
+                    allowRetries: true
+                  },
+                  rewards: {
+                    totalPoints: 550,
+                    badge: 'Developer Console Expert',
+                    message: 'You\'ve mastered the Developer Console! You\'re ready to write real Apex code.'
                   }
                 },
                 validation: {
-                  checkObjectives: true,
+                  trackProgress: true,
+                  saveProgress: true,
                   allowExperimentation: true
                 },
-                feedback: 'Great job exploring the Developer Console! You\'re ready to start coding!'
+                feedback: 'Outstanding work! The Developer Console is now your coding headquarters. Time to build something amazing!'
               }
             ],
             resources: [

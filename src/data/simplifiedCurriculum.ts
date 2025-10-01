@@ -3032,25 +3032,318 @@ The journey from admin to developer is one of the most rewarding in tech. You're
                 {
                   id: 'playground-apex-development',
                   type: 'playground',
-                  title: 'Practice Apex Development',
-                  description: 'Write and test Apex code in a simulated Developer Console environment',
+                  title: 'Apex Development Interactive Lab',
+                  description: 'Master Apex programming through progressive challenges with real-time feedback',
                   module: 'apex',
                   data: {
-                    showDeveloperConsole: true,
-                    allowedActions: ['view', 'create', 'edit', 'execute', 'debug'],
-                    initialView: 'apex',
-                    objectives: [
-                      'Write a simple Apex class',
-                      'Execute Apex code',
-                      'View debug logs',
-                      'Test Apex functionality'
+                    mode: 'apex-coding-lab',
+                    enableCodeEditor: true,
+                    enableRealTimeValidation: true,
+                    enableDebugger: true,
+                    editorFeatures: {
+                      syntaxHighlighting: true,
+                      autoComplete: true,
+                      errorHighlighting: true,
+                      lineNumbers: true,
+                      codeFormatting: true
+                    },
+                    challenges: [
+                      {
+                        id: 'first-class',
+                        title: 'Challenge 1: Create Your First Class',
+                        difficulty: 'beginner',
+                        description: 'Build a simple Apex class with a method',
+                        objective: 'Create a class called HelloWorld with a method that returns a greeting',
+                        requirements: [
+                          'Class name must be HelloWorld',
+                          'Must be public',
+                          'Include a method called getGreeting()',
+                          'Method should return a String'
+                        ],
+                        starterCode: `// Create your HelloWorld class here
+public class HelloWorld {
+    // Add your method here
+}`,
+                        solution: `public class HelloWorld {
+    public static String getGreeting() {
+        return 'Hello, Salesforce Developer!';
+    }
+}`,
+                        tests: [
+                          {
+                            name: 'Class exists',
+                            check: 'class HelloWorld exists'
+                          },
+                          {
+                            name: 'Method exists',
+                            check: 'method getGreeting exists'
+                          },
+                          {
+                            name: 'Returns greeting',
+                            check: 'returns non-empty string'
+                          }
+                        ],
+                        hints: [
+                          'Use the public keyword before class',
+                          'Static methods can be called without creating an instance',
+                          'Don\'t forget the return statement'
+                        ],
+                        rewards: { points: 100, message: '🎉 You created your first Apex class!' }
+                      },
+                      {
+                        id: 'variables-methods',
+                        title: 'Challenge 2: Work with Variables',
+                        difficulty: 'beginner',
+                        description: 'Create a calculator class with variables and methods',
+                        objective: 'Build a SimpleCalculator class that can add two numbers',
+                        requirements: [
+                          'Create a class called SimpleCalculator',
+                          'Add a method add(Integer a, Integer b)',
+                          'Return the sum of a and b',
+                          'Use variables to store the result'
+                        ],
+                        starterCode: `public class SimpleCalculator {
+    // Create your add method here
+}`,
+                        solution: `public class SimpleCalculator {
+    public static Integer add(Integer a, Integer b) {
+        Integer result = a + b;
+        return result;
+    }
+}`,
+                        tests: [
+                          {
+                            name: 'Adds positive numbers',
+                            input: { a: 5, b: 3 },
+                            expected: 8
+                          },
+                          {
+                            name: 'Adds negative numbers',
+                            input: { a: -5, b: 3 },
+                            expected: -2
+                          },
+                          {
+                            name: 'Adds zero',
+                            input: { a: 0, b: 0 },
+                            expected: 0
+                          }
+                        ],
+                        hints: [
+                          'Integer is the data type for whole numbers',
+                          'Use the + operator to add numbers',
+                          'Store the result in a variable before returning'
+                        ],
+                        rewards: { points: 150, message: '✨ You can now work with variables and methods!' }
+                      },
+                      {
+                        id: 'conditionals',
+                        title: 'Challenge 3: Add Decision Logic',
+                        difficulty: 'intermediate',
+                        description: 'Use IF statements to make decisions',
+                        objective: 'Create a class that determines if a number is positive, negative, or zero',
+                        requirements: [
+                          'Create class NumberChecker',
+                          'Method checkNumber(Integer num)',
+                          'Return "Positive", "Negative", or "Zero"',
+                          'Use IF-ELSE logic'
+                        ],
+                        starterCode: `public class NumberChecker {
+    public static String checkNumber(Integer num) {
+        // Add your IF-ELSE logic here
+        return '';
+    }
+}`,
+                        solution: `public class NumberChecker {
+    public static String checkNumber(Integer num) {
+        if (num > 0) {
+            return 'Positive';
+        } else if (num < 0) {
+            return 'Negative';
+        } else {
+            return 'Zero';
+        }
+    }
+}`,
+                        tests: [
+                          { input: 5, expected: 'Positive' },
+                          { input: -3, expected: 'Negative' },
+                          { input: 0, expected: 'Zero' }
+                        ],
+                        hints: [
+                          'Use > to check if greater than',
+                          'Use < to check if less than',
+                          'ELSE handles the remaining case (zero)'
+                        ],
+                        rewards: { points: 200, message: '🎯 You mastered decision logic!' }
+                      },
+                      {
+                        id: 'soql-basics',
+                        title: 'Challenge 4: Query Salesforce Data',
+                        difficulty: 'intermediate',
+                        description: 'Write SOQL queries to retrieve records',
+                        objective: 'Query Accounts and return their names',
+                        requirements: [
+                          'Use SELECT statement',
+                          'Query from Account object',
+                          'Get Id and Name fields',
+                          'Limit to 10 records'
+                        ],
+                        starterCode: `public class AccountQuerier {
+    public static List<Account> getAccounts() {
+        // Write your SOQL query here
+        return null;
+                    }
+}`,
+                        solution: `public class AccountQuerier {
+    public static List<Account> getAccounts() {
+        List<Account> accounts = [SELECT Id, Name FROM Account LIMIT 10];
+        return accounts;
+    }
+}`,
+                        explanation: 'SOQL queries are written in square brackets [ ]. They retrieve data from Salesforce objects.',
+                        hints: [
+                          'SOQL syntax: SELECT fields FROM object',
+                          'Use square brackets [ ] for queries',
+                          'LIMIT controls how many records returned'
+                        ],
+                        rewards: { points: 250, message: '🔍 You can now query Salesforce data!' }
+                      },
+                      {
+                        id: 'dml-operations',
+                        title: 'Challenge 5: Create Records',
+                        difficulty: 'intermediate',
+                        description: 'Use DML to create new Salesforce records',
+                        objective: 'Create a new Contact record and save it',
+                        requirements: [
+                          'Create a Contact object',
+                          'Set FirstName and LastName',
+                          'Use INSERT to save it',
+                          'Return the created Contact'
+                        ],
+                        starterCode: `public class ContactCreator {
+    public static Contact createContact(String firstName, String lastName) {
+        // Create and insert Contact here
+        return null;
+    }
+}`,
+                        solution: `public class ContactCreator {
+    public static Contact createContact(String firstName, String lastName) {
+        Contact con = new Contact(
+            FirstName = firstName,
+            LastName = lastName
+        );
+        insert con;
+        return con;
+    }
+}`,
+                        explanation: 'DML operations (insert, update, delete, upsert) modify data in Salesforce.',
+                        hints: [
+                          'Use new Contact() to create an instance',
+                          'Set fields using field = value syntax',
+                          'INSERT saves the record to the database'
+                        ],
+                        rewards: { points: 300, badge: 'Apex Developer', message: '🏆 You can now create Salesforce records!' }
+                      },
+                      {
+                        id: 'loops',
+                        title: 'Challenge 6: Process Multiple Records',
+                        difficulty: 'advanced',
+                        description: 'Use loops to process collections of data',
+                        objective: 'Loop through Contacts and update their descriptions',
+                        requirements: [
+                          'Accept a List of Contacts',
+                          'Loop through each Contact',
+                          'Set Description field',
+                          'Update all contacts'
+                        ],
+                        starterCode: `public class ContactUpdater {
+    public static void updateContacts(List<Contact> contacts) {
+        // Loop and update contacts here
+    }
+}`,
+                        solution: `public class ContactUpdater {
+    public static void updateContacts(List<Contact> contacts) {
+        for (Contact con : contacts) {
+            con.Description = 'Updated by Apex';
+        }
+        update contacts;
+    }
+}`,
+                        explanation: 'For-each loops process every item in a collection. Always update in bulk, not one at a time.',
+                        hints: [
+                          'Syntax: for (Type variable : collection)',
+                          'Update the field inside the loop',
+                          'Perform DML outside the loop for efficiency'
+                        ],
+                        rewards: { points: 350, message: '🔄 You mastered loops and bulk operations!' }
+                      },
+                      {
+                        id: 'real-world-challenge',
+                        title: 'Final Challenge: Solve a Business Problem',
+                        difficulty: 'advanced',
+                        description: 'Put it all together: Query, process, and update records',
+                        scenario: {
+                          problem: 'Find all high-value Opportunities and mark them as high priority',
+                          businessRule: 'Any Opportunity with Amount > 100,000 should have Priority = High'
+                        },
+                        requirements: [
+                          'Query Opportunities with Amount > 100000',
+                          'Loop through results',
+                          'Set Priority__c to "High"',
+                          'Update the records',
+                          'Return count of updated records'
+                        ],
+                        starterCode: `public class OpportunityPrioritizer {
+    public static Integer prioritizeLargeDeals() {
+        // Implement your solution here
+        return 0;
+    }
+}`,
+                        solution: `public class OpportunityPrioritizer {
+    public static Integer prioritizeLargeDeals() {
+        List<Opportunity> opps = [SELECT Id, Amount FROM Opportunity WHERE Amount > 100000];
+        for (Opportunity opp : opps) {
+            opp.Priority__c = 'High';
+        }
+        update opps;
+        return opps.size();
+    }
+}`,
+                        explanation: 'This solves a real business problem: automatically identifying and prioritizing large sales deals.',
+                        hints: [
+                          'Use WHERE clause to filter records',
+                          'Process all records in the loop',
+                          'Use .size() to get the count'
+                        ],
+                        rewards: { 
+                          points: 500, 
+                          badge: 'Apex Problem Solver',
+                          message: '🌟 Incredible! You solved a real business problem with Apex!' 
+                        }
+                      }
                     ],
-                    codeExamples: [
-                      'Account creation',
-                      'SOQL queries',
-                      'DML operations',
-                      'Debug statements'
-                    ]
+                    freeCodeMode: {
+                      enabled: true,
+                      description: 'Write any Apex code and test it',
+                      allowedOperations: ['SOQL', 'DML', 'Loops', 'Conditionals', 'Methods', 'Classes']
+                    },
+                    helpResources: {
+                      'Data Types': 'String, Integer, Boolean, Decimal, Date, DateTime, List, Map, Set',
+                      'SOQL': 'SELECT fields FROM object WHERE condition ORDER BY field LIMIT number',
+                      'DML': 'insert, update, delete, upsert, undelete',
+                      'Loops': 'for (Type var : collection) { }, while (condition) { }',
+                      'Conditionals': 'if (condition) { } else if (condition) { } else { }'
+                    },
+                    completionCriteria: {
+                      minimumChallenges: 5,
+                      minimumScore: 1000,
+                      allowRetries: true
+                    },
+                    rewards: {
+                      totalPoints: 1850,
+                      finalBadge: 'Apex Master Developer',
+                      message: 'You\'ve mastered Apex fundamentals! Ready for advanced topics.'
+                    }
                   }
                 }
               ]
